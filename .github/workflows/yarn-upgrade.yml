@@ -42,7 +42,7 @@ jobs:
           YARNRC
 
           rm -f package-lock.json
-          yarn install
+          YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
 
       - name: Verify immutable install
         run: yarn install --immutable
