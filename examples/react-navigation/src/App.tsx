@@ -8,6 +8,9 @@ import {
   type ReactNativeBlueprintScreen,
 } from '@react-native-blueprint/react-native';
 import {
+  BlueprintDevelopmentGuard,
+} from '@react-native-blueprint/react-native/dev';
+import {
   createReactNavigationStaticManifest,
   createReactNavigationRouteVariant,
   registerReactNavigationScreens,
@@ -83,6 +86,20 @@ registerReactNavigationScreens(registry, [
 const screens = registry.list();
 
 export default function App() {
+  return (
+    <BlueprintDevelopmentGuard
+      fallback={
+        <View>
+          <Text>Application runtime</Text>
+        </View>
+      }
+    >
+      <BlueprintExample />
+    </BlueprintDevelopmentGuard>
+  );
+}
+
+function BlueprintExample() {
   const artboards = useMemo(
     () =>
       screens.flatMap((screen) => {

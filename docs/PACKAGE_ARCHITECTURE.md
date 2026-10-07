@@ -25,7 +25,7 @@ These rules are executable through `yarn check:boundaries`.
 
 ## Public entry points
 
-Each package exposes only its package root through its `exports` map. Consumers must use:
+Packages expose their documented public entry points through `exports`. Consumers must use:
 
 ```ts
 import {} from '@react-native-blueprint/core';
@@ -34,9 +34,12 @@ import {} from '@react-native-blueprint/expo-router';
 import {} from '@react-native-blueprint/react-navigation';
 import {} from '@react-native-blueprint/plugin-redux';
 import {} from '@react-native-blueprint/plugin-tokens';
+import {} from '@react-native-blueprint/react-native/dev';
 ```
 
-Deep imports such as `@react-native-blueprint/core/src/...` are intentionally unsupported. The entry points are scaffolds in RNBP-001. Functional APIs are added by the later refactor tickets.
+Deep imports such as `@react-native-blueprint/core/src/...` are intentionally unsupported.
+`@react-native-blueprint/react-native/dev` is the only public subpath and contains
+the development guard helpers.
 
 ## Build and type checking
 

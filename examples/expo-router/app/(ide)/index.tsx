@@ -1,4 +1,5 @@
 import React, { type ComponentType, useMemo } from 'react';
+import { Redirect } from 'expo-router';
 import {
   discoverExpoRouterScreensFromContext,
   type ExpoRouterRequireContext,
@@ -8,6 +9,9 @@ import {
   BlueprintView,
   type ReactNativeBlueprintScreen,
 } from '@react-native-blueprint/react-native';
+import {
+  isBlueprintDevelopmentEnabled,
+} from '@react-native-blueprint/react-native/dev';
 
 import PassageScreen from '../../components/PassageScreen';
 import StudyScreen from '../../components/StudyScreen';
@@ -78,6 +82,12 @@ const discoveredScreens = discoverExpoRouterScreensFromContext(routeContext, {
 });
 
 export default function BlueprintRoute() {
+  return isBlueprintDevelopmentEnabled()
+    ? <BlueprintCanvas />
+    : <Redirect href="/" />;
+}
+
+function BlueprintCanvas() {
   const artboards = useMemo(
     () =>
       discoveredScreens.flatMap((screen) => {

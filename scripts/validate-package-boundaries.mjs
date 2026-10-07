@@ -3,12 +3,12 @@ import { join } from 'node:path';
 
 const root = process.cwd();
 const expected = new Map([
-  ['core', { name: '@react-native-blueprint/core', internal: [] }],
-  ['react-native', { name: '@react-native-blueprint/react-native', internal: ['@react-native-blueprint/core'] }],
-  ['expo-router', { name: '@react-native-blueprint/expo-router', internal: ['@react-native-blueprint/core'] }],
-  ['react-navigation', { name: '@react-native-blueprint/react-navigation', internal: ['@react-native-blueprint/core'] }],
-  ['plugin-redux', { name: '@react-native-blueprint/plugin-redux', internal: ['@react-native-blueprint/core'] }],
-  ['plugin-tokens', { name: '@react-native-blueprint/plugin-tokens', internal: ['@react-native-blueprint/core'] }],
+  ['core', { name: '@react-native-blueprint/core', internal: [], exports: ['.'] }],
+  ['react-native', { name: '@react-native-blueprint/react-native', internal: ['@react-native-blueprint/core'], exports: ['.', './dev'] }],
+  ['expo-router', { name: '@react-native-blueprint/expo-router', internal: ['@react-native-blueprint/core'], exports: ['.'] }],
+  ['react-navigation', { name: '@react-native-blueprint/react-navigation', internal: ['@react-native-blueprint/core'], exports: ['.'] }],
+  ['plugin-redux', { name: '@react-native-blueprint/plugin-redux', internal: ['@react-native-blueprint/core'], exports: ['.'] }],
+  ['plugin-tokens', { name: '@react-native-blueprint/plugin-tokens', internal: ['@react-native-blueprint/core'], exports: ['.'] }],
 ]);
 
 const forbiddenCoreDependencies = new Set([
@@ -30,8 +30,11 @@ for (const [directory, rules] of expected) {
   }
 
   const exportKeys = Object.keys(manifest.exports ?? {});
-  if (exportKeys.length !== 1 || exportKeys[0] !== '.') {
-    throw new Error(`${manifest.name}: only the package-root "." export is allowed during the refactor`);
+  const expectedExports = [...rules.exports].sort();
+  if (JSON.stringify([...exportKeys].sort()) !== JSON.stringify(expectedExports)) {
+    throw new Error(
+      `${manifest.name}: exports ${exportKeys.join(', ')} do not match allowed exports ${expectedExports.join(', ')}`,
+    );
   }
 
   const dependencies = manifest.dependencies ?? {};
