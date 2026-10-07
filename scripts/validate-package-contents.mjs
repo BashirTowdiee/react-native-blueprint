@@ -45,13 +45,30 @@ for (const directory of packageDirectories) {
 
   const [result] = JSON.parse(packed.stdout);
   const files = new Set(result.files.map(({ path }) => path));
+  const explicitRootFiles = new Set(
+    (manifest.files ?? [])
+      .map((file) => file.replace(/^\.\//, ''))
+      .filter((file) => file !== 'dist' && !file.includes('*')),
+  );
 
   if (!files.has('package.json')) {
     throw new Error(`${manifest.name}: package.json is missing from tarball`);
   }
 
+  for (const file of explicitRootFiles) {
+    if (!files.has(file)) {
+      throw new Error(
+        `${manifest.name}: package files entry ${file} is missing from tarball`,
+      );
+    }
+  }
+
   for (const file of files) {
-    if (file !== 'package.json' && !file.startsWith('dist/')) {
+    if (
+      file !== 'package.json' &&
+      !file.startsWith('dist/') &&
+      !explicitRootFiles.has(file)
+    ) {
       throw new Error(
         `${manifest.name}: unexpected tarball file ${file}`,
       );

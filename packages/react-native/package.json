@@ -15,7 +15,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "dev.js",
+    "dev.d.ts"
   ],
   "sideEffects": false,
   "publishConfig": {
