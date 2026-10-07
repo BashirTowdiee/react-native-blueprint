@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  type LayoutChangeEvent,
   Platform,
   Pressable,
   ScrollView,
@@ -31,6 +32,11 @@ import {
 
 const DEFAULT_ARTBOARD_WIDTH = 375;
 const DEFAULT_ARTBOARD_HEIGHT = 667;
+const ARTBOARD_MARGIN = 10;
+const CANVAS_PADDING = 40;
+const FIT_PADDING = 32;
+const GROUP_GAP = 32;
+const GROUP_LABEL_HEIGHT = 28;
 
 export type BlueprintDevicePreset = BlueprintViewport & {
   id: string;
@@ -166,6 +172,7 @@ export type BlueprintViewProps = {
   maxZoom?: number;
   zoomStep?: number;
   showZoomControls?: boolean;
+  fitOnMount?: boolean;
   showInspector?: boolean;
   selectedArtboardId?: string;
   defaultSelectedArtboardId?: string;
@@ -184,6 +191,7 @@ export function BlueprintView({
   maxZoom = DEFAULT_BLUEPRINT_MAX_ZOOM,
   zoomStep = DEFAULT_BLUEPRINT_ZOOM_STEP,
   showZoomControls = true,
+  fitOnMount = true,
   showInspector = true,
   selectedArtboardId,
   defaultSelectedArtboardId,
@@ -197,6 +205,8 @@ export function BlueprintView({
   );
   const [internalSelectedArtboardId, setInternalSelectedArtboardId] =
     useState(defaultSelectedArtboardId);
+  const [fitToCanvas, setFitToCanvas] = useState(fitOnMount);
+  const [workspaceSize, setWorkspaceSize] = useState({ width: 0, height: 0 });
   const workspaceRef = useRef<View>(null);
   const activeSelectedArtboardId =
     selectedArtboardId ?? internalSelectedArtboardId;
@@ -204,6 +214,7 @@ export function BlueprintView({
     ({ id }) => id === activeSelectedArtboardId,
   );
   const groups = useMemo(() => groupArtboards(artboards), [artboards]);
+  const canvasSize = useMemo(() => measureCanvas(groups), [groups]);
 
   const setZoom = useCallback(
     (nextZoom: number | ((currentZoom: number) => number)) => {
@@ -227,12 +238,30 @@ export function BlueprintView({
   );
 
   const zoomIn = useCallback(() => {
+    setFitToCanvas(false);
     setZoom((currentZoom) => currentZoom + zoomStep);
   }, [setZoom, zoomStep]);
 
   const zoomOut = useCallback(() => {
+    setFitToCanvas(false);
     setZoom((currentZoom) => currentZoom - zoomStep);
   }, [setZoom, zoomStep]);
+
+  const fitCanvas = useCallback(() => {
+    if (workspaceSize.width <= 0 || workspaceSize.height <= 0) {
+      return;
+    }
+
+    setFitToCanvas(true);
+    setZoom(
+      calculateFitZoom(
+        canvasSize,
+        workspaceSize,
+        minZoom,
+        maxZoom,
+      ),
+    );
+  }, [canvasSize, maxZoom, minZoom, setZoom, workspaceSize]);
 
   const selectArtboard = useCallback(
     (artboard: BlueprintArtboardDefinition | undefined) => {
@@ -245,6 +274,7 @@ export function BlueprintView({
   );
 
   const resetCanvas = useCallback(() => {
+    setFitToCanvas(false);
     setZoom(initialZoom);
     const defaultArtboard = defaultSelectedArtboardId
       ? artboards.find(({ id }) => id === defaultSelectedArtboardId)
@@ -265,6 +295,7 @@ export function BlueprintView({
       }
 
       event.preventDefault();
+      setFitToCanvas(false);
       setZoom((currentZoom) =>
         event.deltaY < 0
           ? currentZoom + zoomStep
@@ -273,6 +304,42 @@ export function BlueprintView({
     },
     [setZoom, zoomStep],
   );
+
+  const handleWorkspaceLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+
+    setWorkspaceSize((current) =>
+      current.width === width && current.height === height
+        ? current
+        : { width, height },
+    );
+  }, []);
+
+  useEffect(() => {
+    if (
+      !fitToCanvas ||
+      workspaceSize.width <= 0 ||
+      workspaceSize.height <= 0
+    ) {
+      return;
+    }
+
+    setZoom(
+      calculateFitZoom(
+        canvasSize,
+        workspaceSize,
+        minZoom,
+        maxZoom,
+      ),
+    );
+  }, [
+    canvasSize,
+    fitToCanvas,
+    maxZoom,
+    minZoom,
+    setZoom,
+    workspaceSize,
+  ]);
 
   useEffect(() => {
     if (Platform.OS !== 'web') {
@@ -292,7 +359,12 @@ export function BlueprintView({
   }, [handleWheel]);
 
   return (
-    <View ref={workspaceRef} style={[styles.root, style]}>
+    <View
+      ref={workspaceRef}
+      onLayout={handleWorkspaceLayout}
+      style={[styles.root, style]}
+      testID="blueprint-workspace"
+    >
       {showZoomControls ? (
         <View style={styles.zoomControls}>
           <Pressable
@@ -317,6 +389,15 @@ export function BlueprintView({
             <Text style={styles.zoomButtonText}>+</Text>
           </Pressable>
           <Pressable
+            accessibilityLabel="Fit all screens"
+            accessibilityRole="button"
+            onPress={fitCanvas}
+            style={styles.resetButton}
+            testID="blueprint-fit"
+          >
+            <Text style={styles.resetButtonText}>Fit</Text>
+          </Pressable>
+          <Pressable
             accessibilityLabel="Reset canvas"
             accessibilityRole="button"
             onPress={resetCanvas}
@@ -336,49 +417,64 @@ export function BlueprintView({
         <ScrollView
           horizontal
           nestedScrollEnabled
+          style={styles.horizontalViewport}
           contentContainerStyle={styles.horizontalContent}
         >
           <View
             style={[
-              styles.canvas,
+              styles.canvasFrame,
               {
-                transform: [{ scale: zoom }],
+                width: canvasSize.width * zoom,
+                height: canvasSize.height * zoom,
               },
             ]}
           >
-            {groups.map((group) => (
-              <View key={group.id} style={styles.group}>
-                {group.label ? (
-                  <Text
-                    style={styles.groupLabel}
-                    testID={`blueprint-group-${group.id}`}
-                  >
-                    {group.label}
-                  </Text>
-                ) : null}
-                <View style={styles.groupArtboards}>
-                  {group.artboards.map((artboard) => {
-                    const viewport = resolveArtboardViewport(artboard);
+            <View
+              style={[
+                styles.canvas,
+                {
+                  width: canvasSize.width,
+                  height: canvasSize.height,
+                  left: -((canvasSize.width * (1 - zoom)) / 2),
+                  top: -((canvasSize.height * (1 - zoom)) / 2),
+                  transform: [{ scale: zoom }],
+                },
+              ]}
+            >
+              {groups.map((group) => (
+                <View key={group.id} style={styles.group}>
+                  {group.label ? (
+                    <Text
+                      style={styles.groupLabel}
+                      testID={`blueprint-group-${group.id}`}
+                    >
+                      {group.label}
+                    </Text>
+                  ) : null}
+                  <View style={styles.groupArtboards}>
+                    {group.artboards.map((artboard) => {
+                      const viewport = resolveArtboardViewport(artboard);
 
-                    return (
-                      <BlueprintArtboard
-                        key={artboard.id}
-                        label={artboard.label}
-                        width={viewport.width}
-                        height={viewport.height}
-                        viewportName={viewport.name}
-                        selected={artboard.id === activeSelectedArtboardId}
-                        onPress={() => selectArtboard(artboard)}
-                        style={artboardStyle}
-                        testID={`blueprint-artboard-${artboard.id}`}
-                      >
-                        {artboard.content}
-                      </BlueprintArtboard>
-                    );
-                  })}
+                      return (
+                        <BlueprintArtboard
+                          key={artboard.id}
+                          label={artboard.label}
+                          width={viewport.width}
+                          height={viewport.height}
+                          viewportName={viewport.name}
+                          selected={artboard.id === activeSelectedArtboardId}
+                          onPress={() => selectArtboard(artboard)}
+                          style={artboardStyle}
+                          testID={`blueprint-artboard-${artboard.id}`}
+                        >
+                          {artboard.content}
+                        </BlueprintArtboard>
+                      );
+                    })}
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
         </ScrollView>
       </ScrollView>
@@ -421,6 +517,54 @@ function groupArtboards(
   }
 
   return [...groups.values()];
+}
+
+function measureCanvas(groups: readonly BlueprintArtboardGroup[]) {
+  const groupSizes = groups.map((group) => {
+    const artboardSizes = group.artboards.map((artboard) => {
+      const viewport = resolveArtboardViewport(artboard);
+
+      return {
+        width: viewport.width + ARTBOARD_MARGIN * 2,
+        height: viewport.height + ARTBOARD_MARGIN * 2,
+      };
+    });
+
+    return {
+      width: artboardSizes.reduce((total, size) => total + size.width, 0),
+      height:
+        Math.max(0, ...artboardSizes.map(({ height }) => height)) +
+        (group.label ? GROUP_LABEL_HEIGHT : 0),
+    };
+  });
+
+  return {
+    width:
+      CANVAS_PADDING * 2 +
+      groupSizes.reduce((total, size) => total + size.width, 0) +
+      Math.max(0, groups.length - 1) * GROUP_GAP,
+    height:
+      CANVAS_PADDING * 2 +
+      Math.max(0, ...groupSizes.map(({ height }) => height)),
+  };
+}
+
+function calculateFitZoom(
+  canvas: { width: number; height: number },
+  workspace: { width: number; height: number },
+  minZoom: number,
+  maxZoom: number,
+) {
+  const availableWidth = Math.max(1, workspace.width - FIT_PADDING * 2);
+  const availableHeight = Math.max(1, workspace.height - FIT_PADDING * 2);
+  const widthZoom = availableWidth / Math.max(1, canvas.width);
+  const heightZoom = availableHeight / Math.max(1, canvas.height);
+
+  return clampBlueprintZoom(
+    Math.min(widthZoom, heightZoom),
+    minZoom,
+    maxZoom,
+  );
 }
 
 function resolveArtboardViewport(
@@ -492,33 +636,42 @@ const styles = StyleSheet.create({
   },
   verticalContent: {
     flexGrow: 1,
+    justifyContent: 'center',
+  },
+  horizontalViewport: {
+    alignSelf: 'stretch',
   },
   horizontalContent: {
     flexGrow: 1,
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: FIT_PADDING,
+  },
+  canvasFrame: {
+    position: 'relative',
   },
   canvas: {
+    position: 'absolute',
+    flexDirection: 'row',
+    gap: GROUP_GAP,
     alignItems: 'flex-start',
-    padding: 20,
+    padding: CANVAS_PADDING,
   },
-  group: {
-    marginBottom: 20,
-  },
+  group: {},
   groupLabel: {
-    marginHorizontal: 10,
-    marginBottom: 8,
+    height: GROUP_LABEL_HEIGHT,
+    marginHorizontal: ARTBOARD_MARGIN,
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+    lineHeight: 20,
   },
   groupArtboards: {
-    maxWidth: 1600,
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'flex-start',
   },
   artboard: {
-    margin: 10,
+    margin: ARTBOARD_MARGIN,
     backgroundColor: '#f0f0f0',
     borderRadius: 15,
     overflow: 'hidden',

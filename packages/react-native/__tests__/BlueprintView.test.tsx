@@ -170,6 +170,66 @@ describe('BlueprintView', () => {
     ).toBeDefined();
   });
 
+  it('fits and recentres a horizontal canvas containing all screen groups', () => {
+    let view!: ReactTestRenderer;
+
+    act(() => {
+      view = renderer.create(
+        <BlueprintView
+          artboards={[
+            {
+              id: 'home',
+              label: 'Default',
+              groupId: 'home',
+              groupLabel: 'Home',
+              content: <Text>Home</Text>,
+            },
+            {
+              id: 'login',
+              label: 'Default',
+              groupId: 'login',
+              groupLabel: 'Login',
+              content: <Text>Login</Text>,
+            },
+          ]}
+          initialZoom={0.5}
+          minZoom={0.1}
+        />,
+      );
+    });
+
+    act(() => {
+      view.root.findByProps({ testID: 'blueprint-workspace' }).props.onLayout({
+        nativeEvent: {
+          layout: {
+            width: 1000,
+            height: 800,
+          },
+        },
+      });
+    });
+
+    expect(
+      view.root.findByProps({ testID: 'blueprint-zoom-value' }).props.children,
+    ).toBe('93%');
+
+    act(() => {
+      view.root.findByProps({ testID: 'blueprint-zoom-in' }).props.onPress();
+    });
+
+    expect(
+      view.root.findByProps({ testID: 'blueprint-zoom-value' }).props.children,
+    ).toBe('98%');
+
+    act(() => {
+      view.root.findByProps({ testID: 'blueprint-fit' }).props.onPress();
+    });
+
+    expect(
+      view.root.findByProps({ testID: 'blueprint-zoom-value' }).props.children,
+    ).toBe('93%');
+  });
+
   it('provides device presets while allowing arbitrary custom viewports', () => {
     expect(createBlueprintViewportFromPreset('phone-standard')).toEqual({
       name: 'Standard phone',
