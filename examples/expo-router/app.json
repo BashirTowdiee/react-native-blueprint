@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "custom-ide",
-    "slug": "custom-ide",
+    "name": "React Native Blueprint Expo Example",
+    "slug": "react-native-blueprint-expo-example",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

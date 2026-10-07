@@ -2,7 +2,7 @@
 
 React Native Blueprint is a development tool for viewing React Native screens together on a blueprint-style canvas. This repository is being refactored from the original in-app IDE experiment into installable, navigation-agnostic packages.
 
-The current Expo application remains the migration prototype while the package APIs are extracted.
+The Expo Router demo now lives under `examples/expo-router` and consumes Blueprint through the package public APIs.
 
 ## Workspace
 
@@ -10,10 +10,10 @@ The repository uses Yarn 4.18.1 with the `node-modules` linker.
 
 ```bash
 yarn install --immutable
-yarn web
+yarn example:expo:web
 ```
 
-The current Blueprint prototype is available at `/ide` when running the web app.
+The Blueprint example route is available at `/ide` when running `examples/expo-router`.
 
 ## Package boundaries
 

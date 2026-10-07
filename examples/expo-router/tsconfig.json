@@ -5,6 +5,12 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@react-native-blueprint/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@react-native-blueprint/react-native": [
+        "../../packages/react-native/src/index.ts"
       ]
     }
   },
@@ -24,8 +30,5 @@
     "store.ts",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ],
-  "exclude": [
-    "packages"
   ]
 }
