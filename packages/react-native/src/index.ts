@@ -1,5 +1,5 @@
 export {
-  BlueprintArtboard,
+  BlueprintArtboardFrame,
   DEFAULT_ARTBOARD_HEIGHT,
   DEFAULT_ARTBOARD_WIDTH,
 } from './BlueprintArtboard';
