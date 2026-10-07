@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
 
+import { createBlueprintScreenRegistry } from '@react-native-blueprint/core';
 import {
   BlueprintPreviewHost,
   BlueprintView,
@@ -8,6 +9,8 @@ import {
 } from '@react-native-blueprint/react-native';
 import {
   createReactNavigationStaticManifest,
+  createReactNavigationRouteVariant,
+  registerReactNavigationScreens,
   type ReactNavigationStaticNavigator,
 } from '@react-native-blueprint/react-navigation';
 
@@ -35,6 +38,14 @@ function ProfileScreen() {
   );
 }
 
+function RemoteFeatureScreen() {
+  return (
+    <View>
+      <Text>Runtime registered feature</Text>
+    </View>
+  );
+}
+
 const navigation: ReactNavigationStaticNavigator<React.ComponentType<any>> = {
   kind: 'stack',
   screens: {
@@ -49,7 +60,27 @@ const navigation: ReactNavigationStaticNavigator<React.ComponentType<any>> = {
   },
 };
 
-const screens = createReactNavigationStaticManifest(navigation);
+const registry = createBlueprintScreenRegistry(
+  createReactNavigationStaticManifest(navigation),
+);
+
+registerReactNavigationScreens(registry, [
+  {
+    routeName: 'RemoteFeature',
+    screen: RemoteFeatureScreen,
+    params: { source: 'runtime' },
+    variants: [
+      createReactNavigationRouteVariant({
+        id: 'sample',
+        name: 'Sample runtime route',
+        routeName: 'RemoteFeature',
+        params: { source: 'runtime', id: 'sample' },
+      }),
+    ],
+  },
+]);
+
+const screens = registry.list();
 
 export default function App() {
   const artboards = useMemo(

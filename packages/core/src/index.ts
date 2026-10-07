@@ -2,6 +2,7 @@ export {
   BlueprintRegistryError,
   createBlueprintScreenRegistry,
   defineBlueprintScreen,
+  registerBlueprintScreens,
   type BlueprintRegisterOptions,
   type BlueprintScreenRegistry,
 } from './registry';

@@ -104,6 +104,15 @@ export function createBlueprintScreenRegistry<TRender = unknown>(
   return registry;
 }
 
+export function registerBlueprintScreens<TRender>(
+  registry: BlueprintScreenRegistry<TRender>,
+  screens: Iterable<BlueprintScreen<TRender>>,
+  options: BlueprintRegisterOptions = {},
+): BlueprintScreenManifest<TRender> {
+  registry.registerMany(screens, options);
+  return registry.list();
+}
+
 function assertScreen<TRender>(screen: BlueprintScreen<TRender>): void {
   assertText(screen.id, 'screen id');
   assertText(screen.name, 'screen name');

@@ -2,6 +2,7 @@ import {
   BlueprintRegistryError,
   createBlueprintScreenRegistry,
   defineBlueprintScreen,
+  registerBlueprintScreens,
   type BlueprintScreen,
 } from '../src';
 
@@ -92,6 +93,26 @@ describe('createBlueprintScreenRegistry', () => {
     expect(registry.get('login')?.name).toBe('Updated login');
     expect(registry.unregister('login')).toBe(true);
     expect(registry.size).toBe(0);
+  });
+
+  it('provides an explicit registerBlueprintScreens integration path', () => {
+    const registry = createBlueprintScreenRegistry([loginScreen]);
+
+    const manifest = registerBlueprintScreens(
+      registry,
+      [
+        {
+          id: 'stories',
+          name: 'Stories',
+          render: 'StoryComponent',
+        },
+      ],
+    );
+
+    expect(manifest.map((screen) => screen.id)).toEqual([
+      'login',
+      'stories',
+    ]);
   });
 
   it('validates viewport dimensions and variant ids', () => {
