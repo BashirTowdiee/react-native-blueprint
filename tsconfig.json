@@ -5,6 +5,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@react-native-blueprint/*": [
+        "./packages/*/src/index.ts"
       ]
     }
   },
