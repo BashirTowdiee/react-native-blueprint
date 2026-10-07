@@ -19,6 +19,8 @@ import {
   validateBlueprintZoomRange,
 } from './zoom';
 
+const IS_WEB = Platform.OS === 'web';
+
 type WheelEventLike = {
   ctrlKey?: boolean;
   metaKey?: boolean;
@@ -90,7 +92,7 @@ export function BlueprintView({
   }, [commitScale, initialScale]);
 
   useEffect(() => {
-    if (Platform.OS !== 'web') {
+    if (!IS_WEB) {
       return;
     }
 
@@ -137,7 +139,9 @@ export function BlueprintView({
             onPress={resetZoom}
             style={styles.scaleButton}
           >
-            <Text style={styles.scaleText}>{Math.round(scale * 100)}%</Text>
+            <Text testID="blueprint-zoom-scale" style={styles.scaleText}>
+              {Math.round(scale * 100)}%
+            </Text>
           </Pressable>
           <Pressable
             accessibilityLabel="Zoom in"
