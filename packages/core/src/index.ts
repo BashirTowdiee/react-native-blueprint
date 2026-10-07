@@ -7,6 +7,12 @@ export {
 } from './registry';
 
 export type {
+  BlueprintPreviewRenderer,
+  BlueprintPreviewRequest,
+  BlueprintPreviewResult,
+} from './preview';
+
+export type {
   BlueprintMetadata,
   BlueprintRoute,
   BlueprintScreen,
