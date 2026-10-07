@@ -31,7 +31,7 @@ export default function HomeScreen() {
     if (isMounted && !auth.isAuthenticated) {
       router.replace('/login');
     }
-  }, [auth.isAuthenticated, router]);
+  }, [isMounted, auth.isAuthenticated, router]);
 
   const handleViewStories = () => {
     router.push('/story-list');
@@ -41,7 +41,7 @@ export default function HomeScreen() {
     // Only available on web
     if (Platform.OS === 'web') {
       // Navigate to the IDE screen
-      window.location.href = '/ide';
+      router.push('/ide');
     }
   };
 

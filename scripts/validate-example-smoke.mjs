@@ -6,7 +6,7 @@ const root = process.cwd();
 const examples = [
   {
     name: 'Expo Router',
-    file: 'examples/expo-router/app/(ide)/index.tsx',
+    file: 'examples/expo-router/app/(ide)/ide.tsx',
     required: [
       '@react-native-blueprint/expo-router',
       '@react-native-blueprint/react-native',

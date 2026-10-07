@@ -12,7 +12,9 @@ yarn add -D @react-native-blueprint/core \
 ```
 
 Discover routes through Metro's public `require.context` surface, convert them
-to artboards and guard the Blueprint route in production:
+to artboards and guard the Blueprint route in production. In Expo Router, a
+route group such as `(ide)` is URL-transparent, so use a named file such as
+`app/(ide)/ide.tsx` when the Blueprint surface should live at `/ide`:
 
 ```tsx
 import React from 'react';
@@ -30,7 +32,7 @@ import {
 
 const routeContext = require.context('..', true, /^\.\/.*\.(ts|tsx)$/);
 const screens = discoverExpoRouterScreensFromContext(routeContext, {
-  excludeFiles: ['./(ide)/index.tsx'],
+  excludeFiles: ['./(ide)/ide.tsx'],
 });
 
 export default function BlueprintRoute() {

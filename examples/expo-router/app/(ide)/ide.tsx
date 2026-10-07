@@ -54,7 +54,7 @@ const routeContext = require.context(
 ) as ExpoRouterRequireContext<ComponentType<any>>;
 
 const discoveredScreens = discoverExpoRouterScreensFromContext(routeContext, {
-  excludeFiles: ['./(ide)/index.tsx'],
+  excludeFiles: ['./(ide)/ide.tsx'],
   fixtures: {
     '/passage/[id]': [
       {
