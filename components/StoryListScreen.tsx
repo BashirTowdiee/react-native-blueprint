@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useTokens } from '../design-system/tokens';
 import { createStyles } from '../design-system/styles';
+import { useAppNavigation } from '../hooks/useAppNavigation';
 
 // Mock data for stories
 const MOCK_STORIES = [
@@ -71,21 +71,13 @@ const MOCK_STORIES = [
   },
 ];
 
-type StoryListScreenProps = {
-  designing?: boolean;
-};
-
-export default function StoryListScreen({
-  designing = false,
-}: StoryListScreenProps) {
+export default function StoryListScreen() {
   const tokens = useTokens();
   const styles = createStyles(tokens);
-  const router = useRouter();
+  const navigation = useAppNavigation();
 
   const handleStoryPress = (id: string) => {
-    if (!designing) {
-      router.push(`/passage/${id}`);
-    }
+    navigation.push(`/passage/${id}`);
   };
 
   const renderStoryItem = ({ item }: { item: (typeof MOCK_STORIES)[0] }) => (

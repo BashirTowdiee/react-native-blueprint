@@ -16,9 +16,18 @@ import StoryListScreen from '../components/StoryListScreen';
 import PassageScreen from '../components/PassageScreen';
 import StudyScreen from '../components/StudyScreen';
 import ColorPicker from '../components/ColorPicker';
+import {
+  AppNavigationProvider,
+  type AppNavigation,
+} from '../hooks/useAppNavigation';
 
 // Tab types for the sidebar
 type TabType = 'tokens' | 'redux';
+
+const previewNavigation: AppNavigation = {
+  push() {},
+  back() {},
+};
 
 export default function IDEScreen() {
   const tokens = useTokens();
@@ -307,22 +316,24 @@ export default function IDEScreen() {
               padding: 20,
             }}
           >
-            {/* Screen containers */}
-            <ScreenContainer label="Login">
-              <LoginScreen designing />
-            </ScreenContainer>
+            <AppNavigationProvider navigation={previewNavigation}>
+              {/* Screen containers */}
+              <ScreenContainer label="Login">
+                <LoginScreen />
+              </ScreenContainer>
 
-            <ScreenContainer label="StoryList">
-              <StoryListScreen designing />
-            </ScreenContainer>
+              <ScreenContainer label="StoryList">
+                <StoryListScreen />
+              </ScreenContainer>
 
-            <ScreenContainer label="Passage">
-              <PassageScreen designing />
-            </ScreenContainer>
+              <ScreenContainer label="Passage">
+                <PassageScreen passageId="1" />
+              </ScreenContainer>
 
-            <ScreenContainer label="StudyScreen">
-              <StudyScreen designing />
-            </ScreenContainer>
+              <ScreenContainer label="StudyScreen">
+                <StudyScreen passageId="1" />
+              </ScreenContainer>
+            </AppNavigationProvider>
           </View>
         </View>
       </View>

@@ -34,7 +34,7 @@ export default function PassageRoute() {
 
   return (
     <View style={{ flex: 1 }}>
-      <PassageScreen />
+      <PassageScreen passageId={id} />
     </View>
   );
 }

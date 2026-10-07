@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTokens } from '../design-system/tokens';
 import { createStyles } from '../design-system/styles';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppNavigation } from '../hooks/useAppNavigation';
 
 // Mock data for a specific passage
 const MOCK_PASSAGE = {
@@ -34,26 +34,22 @@ I spent a very peaceful time.`,
 };
 
 type PassageScreenProps = {
-  designing?: boolean;
+  passageId: string;
 };
 
 export default function PassageScreen({
-  designing = false,
+  passageId,
 }: PassageScreenProps) {
   const tokens = useTokens();
   const styles = createStyles(tokens);
-  const router = useRouter();
-  const params = useLocalSearchParams();
+  const navigation = useAppNavigation();
   const [showTranslation, setShowTranslation] = useState(false);
 
-  // In a real app, you'd fetch the story based on the ID
-  // const storyId = params.id as string;
+  // In a real app, you'd fetch the story based on passageId.
   const passage = MOCK_PASSAGE;
 
   const handleStudyPress = () => {
-    if (!designing) {
-      router.push(`/study/${passage.id}`);
-    }
+    navigation.push(`/study/${passageId}`);
   };
 
   const handlePlayAudio = () => {

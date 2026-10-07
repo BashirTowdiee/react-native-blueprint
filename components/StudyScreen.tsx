@@ -8,10 +8,10 @@ import {
   PanResponder,
   Dimensions,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTokens } from '../design-system/tokens';
 import { createStyles } from '../design-system/styles';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppNavigation } from '../hooks/useAppNavigation';
 
 // Mock vocabulary data for flashcards
 const MOCK_VOCABULARY = [
@@ -25,21 +25,19 @@ const MOCK_VOCABULARY = [
 ];
 
 type StudyScreenProps = {
-  designing?: boolean;
+  passageId: string;
 };
 
-export default function StudyScreen({ designing = false }: StudyScreenProps) {
+export default function StudyScreen({ passageId }: StudyScreenProps) {
   const tokens = useTokens();
   const styles = createStyles(tokens);
-  const router = useRouter();
-  const params = useLocalSearchParams();
+  const navigation = useAppNavigation();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showMeaning, setShowMeaning] = useState(false);
   const [finished, setFinished] = useState(false);
 
-  // In a real app, you'd fetch the flashcards based on the passage ID
-  // const passageId = params.id as string;
+  // In a real app, you'd fetch the flashcards based on passageId.
   const flashcards = MOCK_VOCABULARY;
 
   // For card animation
@@ -97,9 +95,7 @@ export default function StudyScreen({ designing = false }: StudyScreenProps) {
   };
 
   const handleFinish = () => {
-    if (!designing) {
-      router.back();
-    }
+    navigation.back();
   };
 
   const resetCards = () => {

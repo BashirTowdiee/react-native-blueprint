@@ -34,7 +34,7 @@ export default function StudyRoute() {
 
   return (
     <View style={{ flex: 1 }}>
-      <StudyScreen />
+      <StudyScreen passageId={id} />
     </View>
   );
 }

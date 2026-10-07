@@ -68,8 +68,8 @@ Adapters may discover or generate this contract. Consumers must also be able to 
 - Blueprint directly reads Redux state.
 - Blueprint directly owns token editing.
 - The app root initialises the token server before rendering.
-- Demo screens import Expo Router and use a Blueprint-only `designing` prop to suppress navigation.
-- Dynamic route examples read Expo Router params directly, making deterministic preview fixtures difficult.
+- ~~Demo screens import Expo Router and use a Blueprint-only `designing` prop to suppress navigation.~~ Resolved in RNBP-005 through an app-owned navigation boundary with preview overrides.
+- ~~Dynamic route examples read Expo Router params directly, making deterministic preview fixtures difficult.~~ Resolved in RNBP-005 by passing explicit route fixture props to previewed screens.
 
 These are acceptable prototype shortcuts but are incompatible with a plug-and-play package.
 

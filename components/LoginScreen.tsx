@@ -8,9 +8,9 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { useRouter } from 'expo-router';
 import { useTokens, getColor } from '../design-system/tokens';
 import { createStyles } from '../design-system/styles';
+import { useAppNavigation } from '../hooks/useAppNavigation';
 
 // If this were a real app, you'd have a proper login action
 const loginAction = (username: string, password: string) => {
@@ -20,14 +20,10 @@ const loginAction = (username: string, password: string) => {
   };
 };
 
-type LoginScreenProps = {
-  designing?: boolean;
-};
-
-export default function LoginScreen({ designing = false }: LoginScreenProps) {
+export default function LoginScreen() {
   const tokens = useTokens();
   const styles = createStyles(tokens);
-  const router = useRouter();
+  const navigation = useAppNavigation();
   const dispatch = useDispatch();
 
   const [username, setUsername] = useState('');
@@ -37,11 +33,7 @@ export default function LoginScreen({ designing = false }: LoginScreenProps) {
     if (username.trim()) {
       // Dispatch login action to Redux
       dispatch(loginAction(username, password));
-
-      // Only navigate if we're not in designing mode
-      if (!designing) {
-        router.push('/story-list');
-      }
+      navigation.push('/story-list');
     }
   };
 

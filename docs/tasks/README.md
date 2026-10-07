@@ -8,7 +8,7 @@ Status values: `TODO`, `IN PROGRESS`, `BLOCKED`, `DONE`.
 | RNBP-002 | Core | P0 | DONE | Extract Blueprint canvas and artboard primitives | RNBP-001 |
 | RNBP-003 | Core | P0 | DONE | Screen manifest and registry API | RNBP-001, RNBP-002 |
 | RNBP-004 | Core | P0 | DONE | Preview host and rendering boundary | RNBP-003 |
-| RNBP-005 | Core | P0 | TODO | Remove Blueprint-specific application screen behaviour | RNBP-004 |
+| RNBP-005 | Core | P0 | DONE | Remove Blueprint-specific application screen behaviour | RNBP-004 |
 | RNBP-006 | Expo | P1 | TODO | Move prototype into Expo Router example app | RNBP-004 |
 | RNBP-007 | Expo | P1 | TODO | Expo Router discovery adapter | RNBP-003, RNBP-006 |
 | RNBP-008 | Expo | P1 | TODO | Dynamic route fixtures and variants | RNBP-007 |
