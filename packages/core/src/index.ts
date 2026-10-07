@@ -1,7 +1,16 @@
-/**
- * Navigation-independent Blueprint domain APIs.
- *
- * RNBP-002 and RNBP-003 will populate this entry point with the canvas model
- * and screen registry. Keep navigation, state-management and Expo imports out.
- */
-export {};
+export {
+  BlueprintRegistryError,
+  createBlueprintScreenRegistry,
+  defineBlueprintScreen,
+  type BlueprintRegisterOptions,
+  type BlueprintScreenRegistry,
+} from './registry';
+
+export type {
+  BlueprintMetadata,
+  BlueprintRoute,
+  BlueprintScreen,
+  BlueprintScreenManifest,
+  BlueprintVariant,
+  BlueprintViewport,
+} from './types';
