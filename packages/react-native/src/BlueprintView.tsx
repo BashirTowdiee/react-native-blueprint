@@ -2,6 +2,7 @@ import React, {
   type ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -16,6 +17,11 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import type {
+  BlueprintMetadata,
+  BlueprintViewport,
+} from '@react-native-blueprint/core';
+
 import {
   clampBlueprintZoom,
   DEFAULT_BLUEPRINT_MAX_ZOOM,
@@ -25,6 +31,47 @@ import {
 
 const DEFAULT_ARTBOARD_WIDTH = 375;
 const DEFAULT_ARTBOARD_HEIGHT = 667;
+
+export type BlueprintDevicePreset = BlueprintViewport & {
+  id: string;
+};
+
+export const BLUEPRINT_DEVICE_PRESETS: readonly BlueprintDevicePreset[] = [
+  {
+    id: 'phone-compact',
+    name: 'Compact phone',
+    width: 375,
+    height: 667,
+  },
+  {
+    id: 'phone-standard',
+    name: 'Standard phone',
+    width: 390,
+    height: 844,
+  },
+  {
+    id: 'tablet-portrait',
+    name: 'Tablet portrait',
+    width: 768,
+    height: 1024,
+  },
+];
+
+export function createBlueprintViewportFromPreset(
+  presetId: string,
+): BlueprintViewport {
+  const preset = BLUEPRINT_DEVICE_PRESETS.find(({ id }) => id === presetId);
+
+  if (!preset) {
+    throw new RangeError(`Unknown Blueprint device preset: ${presetId}`);
+  }
+
+  return {
+    width: preset.width,
+    height: preset.height,
+    name: preset.name,
+  };
+}
 
 type WheelEventLike = {
   ctrlKey?: boolean;
@@ -48,8 +95,12 @@ export type BlueprintArtboardDefinition = {
   id: string;
   label: string;
   content: ReactNode;
+  viewport?: BlueprintViewport;
   width?: number;
   height?: number;
+  groupId?: string;
+  groupLabel?: string;
+  metadata?: BlueprintMetadata;
 };
 
 export type BlueprintArtboardProps = {
@@ -57,6 +108,9 @@ export type BlueprintArtboardProps = {
   children: ReactNode;
   width?: number;
   height?: number;
+  viewportName?: string;
+  selected?: boolean;
+  onPress?: () => void;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 };
@@ -66,14 +120,21 @@ export function BlueprintArtboard({
   children,
   width = DEFAULT_ARTBOARD_WIDTH,
   height = DEFAULT_ARTBOARD_HEIGHT,
+  viewportName,
+  selected = false,
+  onPress,
   style,
   testID,
 }: BlueprintArtboardProps) {
   return (
-    <View
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
       testID={testID}
       style={[
         styles.artboard,
+        selected ? styles.selectedArtboard : null,
         {
           width,
           height,
@@ -82,8 +143,19 @@ export function BlueprintArtboard({
       ]}
     >
       <Text style={styles.artboardLabel}>{label}</Text>
+      <Text
+        style={styles.artboardViewport}
+        testID={testID ? `${testID}-viewport` : undefined}
+      >
+        {[
+          viewportName,
+          `${width} × ${height}`,
+        ]
+          .filter(Boolean)
+          .join(' · ')}
+      </Text>
       <View style={styles.artboardContent}>{children}</View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -94,9 +166,15 @@ export type BlueprintViewProps = {
   maxZoom?: number;
   zoomStep?: number;
   showZoomControls?: boolean;
+  showInspector?: boolean;
+  selectedArtboardId?: string;
+  defaultSelectedArtboardId?: string;
   style?: StyleProp<ViewStyle>;
   artboardStyle?: StyleProp<ViewStyle>;
   onZoomChange?: (zoom: number) => void;
+  onSelectArtboard?: (
+    artboard: BlueprintArtboardDefinition | undefined,
+  ) => void;
 };
 
 export function BlueprintView({
@@ -106,14 +184,26 @@ export function BlueprintView({
   maxZoom = DEFAULT_BLUEPRINT_MAX_ZOOM,
   zoomStep = DEFAULT_BLUEPRINT_ZOOM_STEP,
   showZoomControls = true,
+  showInspector = true,
+  selectedArtboardId,
+  defaultSelectedArtboardId,
   style,
   artboardStyle,
   onZoomChange,
+  onSelectArtboard,
 }: BlueprintViewProps) {
   const [zoom, setZoomState] = useState(() =>
     clampBlueprintZoom(initialZoom, minZoom, maxZoom),
   );
+  const [internalSelectedArtboardId, setInternalSelectedArtboardId] =
+    useState(defaultSelectedArtboardId);
   const workspaceRef = useRef<View>(null);
+  const activeSelectedArtboardId =
+    selectedArtboardId ?? internalSelectedArtboardId;
+  const selectedArtboard = artboards.find(
+    ({ id }) => id === activeSelectedArtboardId,
+  );
+  const groups = useMemo(() => groupArtboards(artboards), [artboards]);
 
   const setZoom = useCallback(
     (nextZoom: number | ((currentZoom: number) => number)) => {
@@ -143,6 +233,30 @@ export function BlueprintView({
   const zoomOut = useCallback(() => {
     setZoom((currentZoom) => currentZoom - zoomStep);
   }, [setZoom, zoomStep]);
+
+  const selectArtboard = useCallback(
+    (artboard: BlueprintArtboardDefinition | undefined) => {
+      if (selectedArtboardId === undefined) {
+        setInternalSelectedArtboardId(artboard?.id);
+      }
+      onSelectArtboard?.(artboard);
+    },
+    [onSelectArtboard, selectedArtboardId],
+  );
+
+  const resetCanvas = useCallback(() => {
+    setZoom(initialZoom);
+    const defaultArtboard = defaultSelectedArtboardId
+      ? artboards.find(({ id }) => id === defaultSelectedArtboardId)
+      : undefined;
+    selectArtboard(defaultArtboard);
+  }, [
+    artboards,
+    defaultSelectedArtboardId,
+    initialZoom,
+    selectArtboard,
+    setZoom,
+  ]);
 
   const handleWheel = useCallback(
     (event: WheelEventLike) => {
@@ -202,6 +316,15 @@ export function BlueprintView({
           >
             <Text style={styles.zoomButtonText}>+</Text>
           </Pressable>
+          <Pressable
+            accessibilityLabel="Reset canvas"
+            accessibilityRole="button"
+            onPress={resetCanvas}
+            style={styles.resetButton}
+            testID="blueprint-reset"
+          >
+            <Text style={styles.resetButtonText}>Reset</Text>
+          </Pressable>
         </View>
       ) : null}
 
@@ -223,23 +346,140 @@ export function BlueprintView({
               },
             ]}
           >
-            {artboards.map((artboard) => (
-              <BlueprintArtboard
-                key={artboard.id}
-                label={artboard.label}
-                width={artboard.width}
-                height={artboard.height}
-                style={artboardStyle}
-                testID={`blueprint-artboard-${artboard.id}`}
-              >
-                {artboard.content}
-              </BlueprintArtboard>
+            {groups.map((group) => (
+              <View key={group.id} style={styles.group}>
+                {group.label ? (
+                  <Text
+                    style={styles.groupLabel}
+                    testID={`blueprint-group-${group.id}`}
+                  >
+                    {group.label}
+                  </Text>
+                ) : null}
+                <View style={styles.groupArtboards}>
+                  {group.artboards.map((artboard) => {
+                    const viewport = resolveArtboardViewport(artboard);
+
+                    return (
+                      <BlueprintArtboard
+                        key={artboard.id}
+                        label={artboard.label}
+                        width={viewport.width}
+                        height={viewport.height}
+                        viewportName={viewport.name}
+                        selected={artboard.id === activeSelectedArtboardId}
+                        onPress={() => selectArtboard(artboard)}
+                        style={artboardStyle}
+                        testID={`blueprint-artboard-${artboard.id}`}
+                      >
+                        {artboard.content}
+                      </BlueprintArtboard>
+                    );
+                  })}
+                </View>
+              </View>
             ))}
           </View>
         </ScrollView>
       </ScrollView>
+
+      {showInspector && selectedArtboard ? (
+        <BlueprintInspector artboard={selectedArtboard} />
+      ) : null}
     </View>
   );
+}
+
+type BlueprintArtboardGroup = {
+  id: string;
+  label?: string;
+  artboards: readonly BlueprintArtboardDefinition[];
+};
+
+function groupArtboards(
+  artboards: readonly BlueprintArtboardDefinition[],
+): readonly BlueprintArtboardGroup[] {
+  const groups = new Map<string, BlueprintArtboardGroup>();
+
+  for (const artboard of artboards) {
+    const groupId = artboard.groupId ?? '__ungrouped__';
+    const existing = groups.get(groupId);
+
+    if (existing) {
+      groups.set(groupId, {
+        ...existing,
+        artboards: [...existing.artboards, artboard],
+      });
+      continue;
+    }
+
+    groups.set(groupId, {
+      id: groupId,
+      ...(artboard.groupLabel ? { label: artboard.groupLabel } : {}),
+      artboards: [artboard],
+    });
+  }
+
+  return [...groups.values()];
+}
+
+function resolveArtboardViewport(
+  artboard: BlueprintArtboardDefinition,
+): BlueprintViewport {
+  return {
+    width:
+      artboard.viewport?.width ??
+      artboard.width ??
+      DEFAULT_ARTBOARD_WIDTH,
+    height:
+      artboard.viewport?.height ??
+      artboard.height ??
+      DEFAULT_ARTBOARD_HEIGHT,
+    ...(artboard.viewport?.name
+      ? { name: artboard.viewport.name }
+      : {}),
+  };
+}
+
+function BlueprintInspector({
+  artboard,
+}: {
+  artboard: BlueprintArtboardDefinition;
+}) {
+  const viewport = resolveArtboardViewport(artboard);
+
+  return (
+    <View
+      style={styles.inspector}
+      testID={`blueprint-inspector-${artboard.id}`}
+    >
+      <Text style={styles.inspectorTitle}>{artboard.label}</Text>
+      <Text style={styles.inspectorViewport}>
+        {[
+          viewport.name,
+          `${viewport.width} × ${viewport.height}`,
+        ]
+          .filter(Boolean)
+          .join(' · ')}
+      </Text>
+      {artboard.metadata ? (
+        <Text
+          style={styles.inspectorMetadata}
+          testID="blueprint-inspector-metadata"
+        >
+          {formatMetadata(artboard.metadata)}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+function formatMetadata(metadata: BlueprintMetadata): string {
+  try {
+    return JSON.stringify(metadata, null, 2);
+  } catch {
+    return '[Metadata could not be serialised]';
+  }
 }
 
 const styles = StyleSheet.create({
@@ -258,10 +498,24 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   canvas: {
+    alignItems: 'flex-start',
+    padding: 20,
+  },
+  group: {
+    marginBottom: 20,
+  },
+  groupLabel: {
+    marginHorizontal: 10,
+    marginBottom: 8,
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  groupArtboards: {
+    maxWidth: 1600,
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'flex-start',
-    padding: 20,
   },
   artboard: {
     margin: 10,
@@ -271,12 +525,22 @@ const styles = StyleSheet.create({
     borderWidth: 10,
     borderColor: '#333333',
   },
+  selectedArtboard: {
+    borderColor: '#7aa2ff',
+  },
   artboardLabel: {
     backgroundColor: '#333333',
     color: '#ffffff',
     padding: 5,
     textAlign: 'center',
     fontWeight: 'bold',
+  },
+  artboardViewport: {
+    backgroundColor: '#333333',
+    color: '#d9d9d9',
+    paddingBottom: 5,
+    textAlign: 'center',
+    fontSize: 11,
   },
   artboardContent: {
     flex: 1,
@@ -309,5 +573,45 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
+  },
+  resetButton: {
+    minHeight: 32,
+    justifyContent: 'center',
+    marginLeft: 4,
+    paddingHorizontal: 8,
+  },
+  resetButtonText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  inspector: {
+    position: 'absolute',
+    left: 12,
+    bottom: 12,
+    width: 300,
+    maxHeight: 240,
+    borderRadius: 8,
+    backgroundColor: '#1f1f1f',
+    padding: 12,
+  },
+  inspectorTitle: {
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+  inspectorViewport: {
+    marginTop: 4,
+    color: '#d9d9d9',
+    fontSize: 12,
+  },
+  inspectorMetadata: {
+    marginTop: 8,
+    color: '#d9d9d9',
+    fontFamily: Platform.select({
+      ios: 'Menlo',
+      android: 'monospace',
+      default: 'monospace',
+    }),
+    fontSize: 11,
   },
 });

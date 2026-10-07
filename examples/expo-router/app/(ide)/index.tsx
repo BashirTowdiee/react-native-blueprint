@@ -85,9 +85,14 @@ export default function BlueprintRoute() {
 
         return variants.map((variant) => ({
           id: variant ? `${screen.id}:${variant.id}` : screen.id,
-          label: variant ? `${screen.name} · ${variant.name}` : screen.name,
-          width: variant?.viewport?.width ?? screen.viewport?.width,
-          height: variant?.viewport?.height ?? screen.viewport?.height,
+          label: variant?.name ?? 'Default',
+          groupId: screen.id,
+          groupLabel: screen.name,
+          viewport: variant?.viewport ?? screen.viewport,
+          metadata: {
+            ...(screen.metadata ?? {}),
+            ...(variant?.metadata ?? {}),
+          },
           content: (
             <BlueprintPreviewHost
               screen={screen as ReactNativeBlueprintScreen}

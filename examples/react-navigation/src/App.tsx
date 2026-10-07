@@ -85,15 +85,27 @@ const screens = registry.list();
 export default function App() {
   const artboards = useMemo(
     () =>
-      screens.map((screen) => ({
-        id: screen.id,
-        label: screen.name,
-        content: (
-          <BlueprintPreviewHost
-            screen={screen as ReactNativeBlueprintScreen}
-          />
-        ),
-      })),
+      screens.flatMap((screen) => {
+        const variants = screen.variants?.length ? screen.variants : [undefined];
+
+        return variants.map((variant) => ({
+          id: variant ? `${screen.id}:${variant.id}` : screen.id,
+          label: variant?.name ?? 'Default',
+          groupId: screen.id,
+          groupLabel: screen.name,
+          viewport: variant?.viewport ?? screen.viewport,
+          metadata: {
+            ...(screen.metadata ?? {}),
+            ...(variant?.metadata ?? {}),
+          },
+          content: (
+            <BlueprintPreviewHost
+              screen={screen as ReactNativeBlueprintScreen}
+              variant={variant}
+            />
+          ),
+        }));
+      }),
     [],
   );
 

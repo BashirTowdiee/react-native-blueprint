@@ -1,8 +1,11 @@
 export {
   BlueprintArtboard,
   BlueprintView,
+  BLUEPRINT_DEVICE_PRESETS,
+  createBlueprintViewportFromPreset,
   type BlueprintArtboardDefinition,
   type BlueprintArtboardProps,
+  type BlueprintDevicePreset,
   type BlueprintViewProps,
 } from './BlueprintView';
 
