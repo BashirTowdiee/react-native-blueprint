@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { BlueprintArtboard } from './BlueprintArtboard';
+import { BlueprintArtboardFrame } from './BlueprintArtboard';
 import type { BlueprintViewProps } from './types';
 import {
   clampBlueprintScale,
@@ -170,7 +170,7 @@ export function BlueprintView({
             ]}
           >
             {artboards.map((artboard) => (
-              <BlueprintArtboard key={artboard.id} artboard={artboard} />
+              <BlueprintArtboardFrame key={artboard.id} artboard={artboard} />
             ))}
           </View>
         </ScrollView>
