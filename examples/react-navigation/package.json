@@ -1,0 +1,20 @@
+{
+  "name": "react-native-blueprint-react-navigation-example",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@react-native-blueprint/core": "workspace:*",
+    "@react-native-blueprint/react-native": "workspace:*",
+    "@react-native-blueprint/react-navigation": "workspace:*",
+    "@react-navigation/native": "^7.0.14",
+    "react": "18.3.1",
+    "react-native": "0.76.7"
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.12",
+    "typescript": "^5.3.3"
+  }
+}

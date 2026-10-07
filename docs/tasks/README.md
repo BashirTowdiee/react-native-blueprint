@@ -12,7 +12,7 @@ Status values: `TODO`, `IN PROGRESS`, `BLOCKED`, `DONE`.
 | RNBP-006 | Expo | P1 | DONE | Move prototype into Expo Router example app | RNBP-004 |
 | RNBP-007 | Expo | P1 | DONE | Expo Router discovery adapter | RNBP-003, RNBP-006 |
 | RNBP-008 | Expo | P1 | DONE | Dynamic route fixtures and variants | RNBP-007 |
-| RNBP-009 | React Navigation | P1 | TODO | React Navigation static adapter | RNBP-003 |
+| RNBP-009 | React Navigation | P1 | DONE | React Navigation static adapter | RNBP-003 |
 | RNBP-010 | React Navigation | P1 | TODO | React Navigation dynamic registration | RNBP-003, RNBP-009 |
 | RNBP-011 | Preview | P1 | TODO | Provider composition and preview context | RNBP-004 |
 | RNBP-012 | Plugins | P2 | TODO | Extract Redux and design-token tooling | RNBP-001, RNBP-004 |
