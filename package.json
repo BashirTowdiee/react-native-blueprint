@@ -12,12 +12,15 @@
     "example:expo": "yarn workspace react-native-blueprint-expo-example start",
     "example:expo:web": "yarn workspace react-native-blueprint-expo-example web",
     "test": "jest --watchAll",
-    "test:ci": "jest --runInBand",
-    "typecheck": "yarn typecheck:packages && yarn typecheck:examples",
+    "test:ci": "jest --runInBand --no-watchman",
+    "typecheck": "yarn build:packages && yarn typecheck:packages && yarn typecheck:examples",
     "typecheck:packages": "yarn workspaces foreach -A -p --exclude react-native-blueprint-workspace run typecheck",
-    "typecheck:examples": "yarn workspace react-native-blueprint-expo-example typecheck",
+    "typecheck:examples": "yarn workspace react-native-blueprint-expo-example typecheck && yarn workspace react-native-blueprint-react-navigation-example typecheck",
     "build:packages": "yarn workspaces foreach -A -p --topological-dev --exclude react-native-blueprint-workspace run build",
-    "check:boundaries": "node scripts/validate-package-boundaries.mjs"
+    "check:boundaries": "node scripts/validate-package-boundaries.mjs",
+    "validate:packages": "node scripts/validate-package-contents.mjs",
+    "smoke:examples": "node scripts/validate-example-smoke.mjs",
+    "validate:release": "yarn check:boundaries && yarn typecheck && yarn test:ci && yarn smoke:examples && yarn validate:packages"
   },
   "jest": {
     "preset": "jest-expo",

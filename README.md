@@ -34,6 +34,10 @@ The package workspace now contains:
 
 See `docs/PACKAGE_ARCHITECTURE.md` for dependency rules and supported public entry points.
 
+Installation and integration examples are in `docs/QUICK_START.md`. Supported
+version floors and the currently validated baseline are in
+`docs/COMPATIBILITY.md`.
+
 ## Validation
 
 ```bash
@@ -41,8 +45,15 @@ yarn check:boundaries
 yarn typecheck
 yarn build:packages
 yarn test:ci
+yarn smoke:examples
+yarn validate:packages
 ```
+
+`yarn validate:release` runs the complete package boundary, build, typecheck,
+test, example smoke and package-content validation sequence.
 
 ## Refactor status
 
-The implementation plan and ticket backlog live under `docs/`. The first goal is to extract Blueprint View without requiring application screens to know about Blueprint and without coupling core to Expo Router, React Navigation or Redux.
+The RNBP-001 through RNBP-015 refactor is complete. Blueprint View no longer
+requires application screens to know about Blueprint and core remains
+independent of Expo Router, React Navigation and Redux.

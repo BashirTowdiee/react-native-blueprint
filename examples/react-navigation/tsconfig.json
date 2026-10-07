@@ -1,18 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
-    "paths": {
-      "@react-native-blueprint/core": [
-        "../../packages/core/src/index.ts"
-      ],
-      "@react-native-blueprint/react-native": [
-        "../../packages/react-native/src/index.ts"
-      ],
-      "@react-native-blueprint/react-navigation": [
-        "../../packages/react-navigation/src/index.ts"
-      ]
-    }
+    "noEmit": true
   },
   "include": [
     "src/**/*.ts",
