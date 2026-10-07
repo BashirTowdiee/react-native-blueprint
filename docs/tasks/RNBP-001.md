@@ -4,7 +4,7 @@
 
 **Priority:** P0
 
-**Status:** IN PROGRESS
+**Status:** DONE
 
 ## Objective
 
@@ -27,6 +27,16 @@ Convert the single Expo prototype repository into package-oriented boundaries su
 - Example/demo code is separated from publishable package code.
 - Type checking can run across all workspaces.
 - Existing prototype behaviour remains available during migration.
+
+## Validation
+
+- `yarn install --immutable`
+- `yarn check:boundaries`
+- `yarn typecheck`
+- `yarn build:packages`
+- `yarn test:ci`
+
+All validation passed on the RNBP-001 branch before completion.
 
 ## Notes
 
