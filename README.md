@@ -1,66 +1,42 @@
-This project demonstrates the concept about creating an in-app IDE for React Native using Expo and React Native Web. It allows you to view all screens of your app at once in a blueprint-style view and edit design tokens in real-time.
+# React Native Blueprint
 
-## Features
+React Native Blueprint is a development tool for viewing React Native screens together on a blueprint-style canvas. This repository is being refactored from the original in-app IDE experiment into installable, navigation-agnostic packages.
 
-- **Blueprint View**: See all screens of your app at once
-- **Live Design Token Editing**: Update colors and see changes in real time
-- **Redux State Monitoring**: Watch state changes as you interact with the app
-- **Expo Router**: Modern navigation with file-based routing
-- **Cross-platform**: Works on iOS, Android, and Web
+The current Expo application remains the migration prototype while the package APIs are extracted.
 
-## Installation
+## Workspace
 
-## Running the App
+The repository uses Yarn 4.18.1 with the `node-modules` linker.
 
 ```bash
-# Start the development server
-npm start
-
-# Run on web (for IDE features)
-npx expo start --web
-
-# Run on iOS
-npm run ios
-
-# Run on Android
-npm run android
+yarn install --immutable
+yarn web
 ```
 
-## Using the IDE
+The current Blueprint prototype is available at `/ide` when running the web app.
 
-1. Start the app in web mode
-2. Navigate to `/ide` in your browser (e.g., http://localhost:8081/ide)
-3. You'll see all screens of your app laid out in a blueprint view
-4. Use the left panel to toggle between token editing and Redux state monitoring
-5. Click on any color value to edit it and see changes in real time
-6. Changes to tokens will be written to the tokens.json file
+## Package boundaries
 
-## Project Structure
+The package workspace now contains:
 
-```
-app/
-├── (app)/                # Main app routes
-│   ├── _layout.tsx       # Layout for main app
-│   ├── index.tsx         # Home screen
-│   ├── login.tsx         # Login screen
-│   ├── story-list.tsx    # Story list screen
-│   ├── passage/[id].tsx  # Passage detail screen
-│   └── study/[id].tsx    # Study flashcards screen
-├── (ide)/                # IDE routes
-│   ├── _layout.tsx       # Layout for IDE
-│   └── index.tsx         # IDE main screen
-├── _layout.tsx           # Root layout
-├── ide.tsx               # Redirect to IDE
-└── tokens.json           # Design tokens
+- `@react-native-blueprint/core`
+- `@react-native-blueprint/react-native`
+- `@react-native-blueprint/expo-router`
+- `@react-native-blueprint/react-navigation`
+- `@react-native-blueprint/plugin-redux`
+- `@react-native-blueprint/plugin-tokens`
+
+See `docs/PACKAGE_ARCHITECTURE.md` for dependency rules and supported public entry points.
+
+## Validation
+
+```bash
+yarn check:boundaries
+yarn typecheck
+yarn build:packages
+yarn test:ci
 ```
 
-## How It Works
+## Refactor status
 
-The app uses Expo Router with two main route groups:
-
-- `(app)`: Contains the actual app screens for normal use
-- `(ide)`: Contains the special IDE view for development
-
-The design token updates happen through a server that writes to the tokens.json file, which gets hot-reloaded by Fast Refresh.
-
-## Credits
+The implementation plan and ticket backlog live under `docs/`. The first goal is to extract Blueprint View without requiring application screens to know about Blueprint and without coupling core to Expo Router, React Navigation or Redux.

@@ -4,7 +4,7 @@ Status values: `TODO`, `IN PROGRESS`, `BLOCKED`, `DONE`.
 
 | ID | Phase | Priority | Status | Ticket | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| RNBP-001 | Foundation | P0 | TODO | Package/workspace boundaries and public API | - |
+| RNBP-001 | Foundation | P0 | IN PROGRESS | Package/workspace boundaries and public API | - |
 | RNBP-002 | Core | P0 | TODO | Extract Blueprint canvas and artboard primitives | RNBP-001 |
 | RNBP-003 | Core | P0 | TODO | Screen manifest and registry API | RNBP-001, RNBP-002 |
 | RNBP-004 | Core | P0 | TODO | Preview host and rendering boundary | RNBP-003 |
