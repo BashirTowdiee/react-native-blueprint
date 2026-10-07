@@ -83,19 +83,19 @@ describe('BlueprintView', () => {
     const scaleText = () =>
       tree.root.findByProps({ testID: 'blueprint-zoom-scale' }).props.children;
 
-    expect(scaleText()).toEqual(['100', '%']);
+    expect(scaleText()).toEqual([100, '%']);
 
     act(() => {
       tree.root.findByProps({ testID: 'blueprint-zoom-in' }).props.onPress();
     });
 
-    expect(scaleText()).toEqual(['150', '%']);
+    expect(scaleText()).toEqual([150, '%']);
 
     act(() => {
       tree.root.findByProps({ testID: 'blueprint-zoom-in' }).props.onPress();
     });
 
-    expect(scaleText()).toEqual(['150', '%']);
+    expect(scaleText()).toEqual([150, '%']);
 
     act(() => {
       tree.unmount();
