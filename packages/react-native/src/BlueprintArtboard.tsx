@@ -5,11 +5,11 @@ import type { BlueprintArtboard as BlueprintArtboardDefinition } from './types';
 export const DEFAULT_ARTBOARD_WIDTH = 375;
 export const DEFAULT_ARTBOARD_HEIGHT = 667;
 
-type BlueprintArtboardProps = {
+type BlueprintArtboardFrameProps = {
   artboard: BlueprintArtboardDefinition;
 };
 
-export function BlueprintArtboard({ artboard }: BlueprintArtboardProps) {
+export function BlueprintArtboardFrame({ artboard }: BlueprintArtboardFrameProps) {
   const width = artboard.width ?? DEFAULT_ARTBOARD_WIDTH;
   const height = artboard.height ?? DEFAULT_ARTBOARD_HEIGHT;
 
