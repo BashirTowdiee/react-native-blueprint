@@ -1,69 +1,48 @@
 import React, { type ComponentType, useMemo } from 'react';
-
-import { createBlueprintScreenRegistry } from '@react-native-blueprint/core';
+import {
+  discoverExpoRouterScreensFromContext,
+  type ExpoRouterRequireContext,
+} from '@react-native-blueprint/expo-router';
 import {
   BlueprintPreviewHost,
   BlueprintView,
   type ReactNativeBlueprintScreen,
 } from '@react-native-blueprint/react-native';
 
-import LoginScreen from '../../components/LoginScreen';
-import PassageScreen from '../../components/PassageScreen';
-import StoryListScreen from '../../components/StoryListScreen';
-import StudyScreen from '../../components/StudyScreen';
 import {
   AppNavigationProvider,
   type AppNavigation,
 } from '../../hooks/useAppNavigation';
+
+declare global {
+  interface NodeRequire {
+    context(
+      directory: string,
+      useSubdirectories?: boolean,
+      regExp?: RegExp,
+    ): ExpoRouterRequireContext<ComponentType<any>>;
+  }
+}
 
 const previewNavigation: AppNavigation = {
   push() {},
   back() {},
 };
 
-function PassagePreview() {
-  return <PassageScreen passageId="1" />;
-}
+const routeContext = require.context(
+  '..',
+  true,
+  /^\.\/.*\.(?:ts|tsx)$/,
+) as ExpoRouterRequireContext<ComponentType<any>>;
 
-function StudyPreview() {
-  return <StudyScreen passageId="1" />;
-}
-
-const registry = createBlueprintScreenRegistry<ComponentType<any>>([
-  {
-    id: 'login',
-    name: 'Login',
-    render: LoginScreen,
-  },
-  {
-    id: 'story-list',
-    name: 'Story List',
-    render: StoryListScreen,
-  },
-  {
-    id: 'passage',
-    name: 'Passage',
-    render: PassagePreview,
-    route: {
-      pathname: '/passage/[id]',
-      params: { id: '1' },
-    },
-  },
-  {
-    id: 'study',
-    name: 'Study',
-    render: StudyPreview,
-    route: {
-      pathname: '/study/[id]',
-      params: { id: '1' },
-    },
-  },
-]);
+const discoveredScreens = discoverExpoRouterScreensFromContext(routeContext, {
+  excludeFiles: ['./(ide)/index.tsx'],
+});
 
 export default function BlueprintRoute() {
   const artboards = useMemo(
     () =>
-      registry.list().map((screen) => ({
+      discoveredScreens.map((screen) => ({
         id: screen.id,
         label: screen.name,
         width: screen.viewport?.width,

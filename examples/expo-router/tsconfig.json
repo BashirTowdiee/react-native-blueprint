@@ -9,6 +9,9 @@
       "@react-native-blueprint/core": [
         "../../packages/core/src/index.ts"
       ],
+      "@react-native-blueprint/expo-router": [
+        "../../packages/expo-router/src/index.ts"
+      ],
       "@react-native-blueprint/react-native": [
         "../../packages/react-native/src/index.ts"
       ]
