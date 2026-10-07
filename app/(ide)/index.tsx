@@ -1,14 +1,16 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  TextInput,
-  Platform,
   Pressable,
 } from 'react-native';
 import { useSelector } from 'react-redux';
+import {
+  BlueprintView,
+  type BlueprintArtboard,
+} from '@react-native-blueprint/react-native';
 import { useTokens, updateToken } from '../../design-system/tokens';
 import { createStyles } from '../../design-system/styles';
 import LoginScreen from '../../components/LoginScreen';
@@ -20,12 +22,34 @@ import ColorPicker from '../../components/ColorPicker';
 // Tab types for the sidebar
 type TabType = 'tokens' | 'redux';
 
+
+const prototypeArtboards: BlueprintArtboard[] = [
+  {
+    id: 'login',
+    label: 'Login',
+    render: () => <LoginScreen designing />,
+  },
+  {
+    id: 'story-list',
+    label: 'StoryList',
+    render: () => <StoryListScreen designing />,
+  },
+  {
+    id: 'passage',
+    label: 'Passage',
+    render: () => <PassageScreen designing />,
+  },
+  {
+    id: 'study',
+    label: 'StudyScreen',
+    render: () => <StudyScreen designing />,
+  },
+];
+
 export default function IDEScreen() {
   const tokens = useTokens();
   const styles = createStyles(tokens);
   const [tabState, setTabState] = useState<TabType>('tokens');
-  const [artBoardScale, setArtBoardScale] = useState<number>(0.5);
-  const workspaceRef = useRef<View>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [activeColorToken, setActiveColorToken] = useState<{
     path: string[];
@@ -34,38 +58,6 @@ export default function IDEScreen() {
 
   // Get Redux state for display
   const reduxState = useSelector((state) => state);
-
-  // Handle mouse wheel for zooming the artboard
-  const handleWheel = useCallback(
-    (event: any) => {
-      if (event.ctrlKey) {
-        event.preventDefault();
-        const newScale =
-          event.deltaY < 0
-            ? Math.min(artBoardScale + 0.03, 2)
-            : Math.max(artBoardScale - 0.03, 0.3);
-        setArtBoardScale(newScale);
-      }
-    },
-    [artBoardScale],
-  );
-
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      const workspaceElement = workspaceRef.current;
-      if (workspaceElement) {
-        // @ts-ignore - TypeScript doesn't know about DOM events in React Native Web
-        workspaceElement.addEventListener('wheel', handleWheel);
-      }
-
-      return () => {
-        if (workspaceElement) {
-          // @ts-ignore
-          workspaceElement.removeEventListener('wheel', handleWheel);
-        }
-      };
-    }
-  }, [handleWheel]);
 
   // Handle token updates
   const handleColorChange = useCallback(
@@ -171,34 +163,11 @@ export default function IDEScreen() {
         </View>
 
         {/* Main workspace */}
-        <View style={styles.artboard} ref={workspaceRef}>
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              transform: [{ scale: artBoardScale }],
-              transformOrigin: 'top left',
-              padding: 20,
-            }}
-          >
-            {/* Screen containers */}
-            <ScreenContainer label="Login">
-              <LoginScreen designing />
-            </ScreenContainer>
-
-            <ScreenContainer label="StoryList">
-              <StoryListScreen designing />
-            </ScreenContainer>
-
-            <ScreenContainer label="Passage">
-              <PassageScreen designing />
-            </ScreenContainer>
-
-            <ScreenContainer label="StudyScreen">
-              <StudyScreen designing />
-            </ScreenContainer>
-          </View>
-        </View>
+        <BlueprintView
+          artboards={prototypeArtboards}
+          initialScale={0.5}
+          style={styles.artboard}
+        />
       </View>
 
       {/* Color picker modal */}
@@ -212,46 +181,6 @@ export default function IDEScreen() {
           }}
         />
       )}
-    </View>
-  );
-}
-
-// Helper component for screen containers in the artboard
-function ScreenContainer({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  const tokens = useTokens();
-  const styles = createStyles(tokens);
-
-  return (
-    <View
-      style={{
-        width: 375,
-        height: 667,
-        margin: 10,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 15,
-        overflow: 'hidden',
-        borderWidth: 10,
-        borderColor: '#333',
-      }}
-    >
-      <Text
-        style={{
-          backgroundColor: '#333',
-          color: 'white',
-          padding: 5,
-          textAlign: 'center',
-          fontWeight: 'bold',
-        }}
-      >
-        {label}
-      </Text>
-      <View style={{ flex: 1 }}>{children}</View>
     </View>
   );
 }
