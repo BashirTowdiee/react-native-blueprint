@@ -1,12 +1,13 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useSelector } from 'react-redux';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { selectAuth } from '../../../store';
 import StudyScreen from '../../../components/StudyScreen';
+import { useAppNavigation } from '../../../hooks/useAppNavigation';
 
 export default function StudyRoute() {
-  const router = useRouter();
+  const navigation = useAppNavigation();
   const params = useLocalSearchParams();
   const auth = useSelector(selectAuth);
 
@@ -24,9 +25,9 @@ export default function StudyRoute() {
   // If not authenticated, redirect to login
   React.useEffect(() => {
     if (isMounted && !auth.isAuthenticated) {
-      router.push('/login');
+      navigation.push('/login');
     }
-  }, [isMounted, auth.isAuthenticated, router]);
+  }, [isMounted, auth.isAuthenticated, navigation]);
 
   if (!auth.isAuthenticated) {
     return null; // We'll redirect in the useEffect

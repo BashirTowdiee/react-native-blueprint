@@ -32,6 +32,7 @@ declare global {
 
 const previewNavigation: AppNavigation = {
   push() {},
+  replace() {},
   back() {},
 };
 

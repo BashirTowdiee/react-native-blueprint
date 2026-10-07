@@ -16,6 +16,9 @@ export default function AppLayout() {
       push(path) {
         router.push(path as Href);
       },
+      replace(path) {
+        router.replace(path as Href);
+      },
       back() {
         router.back();
       },

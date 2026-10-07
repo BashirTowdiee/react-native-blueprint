@@ -1,12 +1,12 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useSelector } from 'react-redux';
-import { useRouter } from 'expo-router';
 import { selectAuth } from '../../store';
 import LoginScreen from '../../components/LoginScreen';
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 
 export default function LoginRoute() {
-  const router = useRouter();
+  const navigation = useAppNavigation();
   const auth = useSelector(selectAuth);
 
   // Track if component is mounted
@@ -20,9 +20,9 @@ export default function LoginRoute() {
   // If already authenticated, redirect to home
   React.useEffect(() => {
     if (isMounted && auth.isAuthenticated) {
-      router.push('/');
+      navigation.push('/');
     }
-  }, [isMounted, auth.isAuthenticated, router]);
+  }, [isMounted, auth.isAuthenticated, navigation]);
 
   return (
     <View style={{ flex: 1 }}>

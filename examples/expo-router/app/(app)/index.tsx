@@ -7,17 +7,17 @@ import {
   Image,
   Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
 import { selectAuth } from '../../store';
 import { useTokens } from '../../design-system/tokens';
 import { createStyles } from '../../design-system/styles';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 
 export default function HomeScreen() {
   const tokens = useTokens();
   const styles = createStyles(tokens);
-  const router = useRouter();
+  const navigation = useAppNavigation();
   const auth = useSelector(selectAuth);
   const [isMounted, setIsMounted] = React.useState(false);
 
@@ -29,19 +29,19 @@ export default function HomeScreen() {
   useEffect(() => {
     // Redirect to login if not authenticated
     if (isMounted && !auth.isAuthenticated) {
-      router.replace('/login');
+      navigation.replace('/login');
     }
-  }, [isMounted, auth.isAuthenticated, router]);
+  }, [isMounted, auth.isAuthenticated, navigation]);
 
   const handleViewStories = () => {
-    router.push('/story-list');
+    navigation.push('/story-list');
   };
 
   const goToIDE = () => {
     // Only available on web
     if (Platform.OS === 'web') {
       // Navigate to the IDE screen
-      router.push('/ide');
+      navigation.push('/ide');
     }
   };
 

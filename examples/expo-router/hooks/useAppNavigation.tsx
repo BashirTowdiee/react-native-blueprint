@@ -6,6 +6,7 @@ import React, {
 
 export type AppNavigation = {
   push(path: string): void;
+  replace(path: string): void;
   back(): void;
 };
 
