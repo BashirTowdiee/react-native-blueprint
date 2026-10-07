@@ -1,0 +1,56 @@
+name: RNBP-001 validation
+
+on:
+  push:
+    branches:
+      - mymcp/task/rnbp-001-package-foundation
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Yarn 4.18.1 CLI
+        run: npm install --global @yarnpkg/cli-dist@4.18.1
+
+      - name: Update workspace lockfile
+        run: YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
+
+      - name: Verify immutable install
+        run: yarn install --immutable
+
+      - name: Validate package boundaries
+        run: yarn check:boundaries
+
+      - name: Typecheck app and packages
+        run: yarn typecheck
+
+      - name: Build packages
+        run: yarn build:packages
+
+      - name: Unit tests
+        run: yarn test:ci
+
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/rnbp-001.yml
+
+      - name: Commit validated workspace state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "build: lock Blueprint workspaces"
+            git push origin HEAD:"$GITHUB_REF_NAME"
+          fi
