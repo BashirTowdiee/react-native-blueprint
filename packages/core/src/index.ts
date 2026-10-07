@@ -14,6 +14,12 @@ export type {
 } from './preview';
 
 export type {
+  BlueprintPlugin,
+  BlueprintTool,
+  BlueprintToolContribution,
+} from './plugins';
+
+export type {
   BlueprintMetadata,
   BlueprintRoute,
   BlueprintScreen,

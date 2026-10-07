@@ -15,7 +15,7 @@ Status values: `TODO`, `IN PROGRESS`, `BLOCKED`, `DONE`.
 | RNBP-009 | React Navigation | P1 | DONE | React Navigation static adapter | RNBP-003 |
 | RNBP-010 | React Navigation | P1 | DONE | React Navigation dynamic registration | RNBP-003, RNBP-009 |
 | RNBP-011 | Preview | P1 | DONE | Provider composition and preview context | RNBP-004 |
-| RNBP-012 | Plugins | P2 | TODO | Extract Redux and design-token tooling | RNBP-001, RNBP-004 |
+| RNBP-012 | Plugins | P2 | DONE | Extract Redux and design-token tooling | RNBP-001, RNBP-004 |
 | RNBP-013 | UX | P2 | TODO | Blueprint canvas UX, devices and metadata | RNBP-002, RNBP-003 |
 | RNBP-014 | Packaging | P1 | TODO | Development-only entry and production safeguards | RNBP-001, RNBP-006 |
 | RNBP-015 | Release | P1 | TODO | Compatibility matrix, tests, docs and release readiness | RNBP-007, RNBP-010, RNBP-011, RNBP-014 |
