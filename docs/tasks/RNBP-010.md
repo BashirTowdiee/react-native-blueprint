@@ -1,8 +1,11 @@
 # RNBP-010: React Navigation dynamic registration
 
-**Phase:** React Navigation  
-**Priority:** P1  
-**Status:** TODO  
+**Phase:** React Navigation
+
+**Priority:** P1
+
+**Status:** TODO
+
 **Depends on:** RNBP-003, RNBP-009
 
 ## Objective

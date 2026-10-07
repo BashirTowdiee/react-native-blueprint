@@ -1,8 +1,11 @@
 # RNBP-013: Blueprint canvas UX, devices and metadata
 
-**Phase:** UX  
-**Priority:** P2  
-**Status:** TODO  
+**Phase:** UX
+
+**Priority:** P2
+
+**Status:** TODO
+
 **Depends on:** RNBP-002, RNBP-003
 
 ## Objective

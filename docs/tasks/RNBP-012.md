@@ -1,8 +1,11 @@
 # RNBP-012: Extract Redux and design-token tooling into optional plugins
 
-**Phase:** Plugins  
-**Priority:** P2  
-**Status:** TODO  
+**Phase:** Plugins
+
+**Priority:** P2
+
+**Status:** TODO
+
 **Depends on:** RNBP-001, RNBP-004
 
 ## Objective

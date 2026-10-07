@@ -1,8 +1,11 @@
 # RNBP-014: Development-only entry and production safeguards
 
-**Phase:** Packaging  
-**Priority:** P1  
-**Status:** TODO  
+**Phase:** Packaging
+
+**Priority:** P1
+
+**Status:** TODO
+
 **Depends on:** RNBP-001, RNBP-006
 
 ## Objective

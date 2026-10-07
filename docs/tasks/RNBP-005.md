@@ -1,8 +1,11 @@
 # RNBP-005: Remove Blueprint-specific application screen behaviour
 
-**Phase:** Core  
-**Priority:** P0  
-**Status:** TODO  
+**Phase:** Core
+
+**Priority:** P0
+
+**Status:** TODO
+
 **Depends on:** RNBP-004
 
 ## Objective

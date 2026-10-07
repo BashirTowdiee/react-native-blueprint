@@ -1,8 +1,11 @@
 # RNBP-004: Preview host and rendering boundary
 
-**Phase:** Core  
-**Priority:** P0  
-**Status:** TODO  
+**Phase:** Core
+
+**Priority:** P0
+
+**Status:** TODO
+
 **Depends on:** RNBP-003
 
 ## Objective

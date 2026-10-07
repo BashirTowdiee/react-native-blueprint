@@ -1,7 +1,9 @@
 # RNBP-001: Package/workspace boundaries and public API
 
-**Phase:** Foundation  
-**Priority:** P0  
+**Phase:** Foundation
+
+**Priority:** P0
+
 **Status:** TODO
 
 ## Objective

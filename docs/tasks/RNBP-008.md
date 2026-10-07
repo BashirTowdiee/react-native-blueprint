@@ -1,8 +1,11 @@
 # RNBP-008: Dynamic route fixtures and variants
 
-**Phase:** Expo Router  
-**Priority:** P1  
-**Status:** TODO  
+**Phase:** Expo Router
+
+**Priority:** P1
+
+**Status:** TODO
+
 **Depends on:** RNBP-007
 
 ## Objective

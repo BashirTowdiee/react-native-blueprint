@@ -1,8 +1,11 @@
 # RNBP-002: Extract Blueprint canvas and artboard primitives
 
-**Phase:** Core  
-**Priority:** P0  
-**Status:** TODO  
+**Phase:** Core
+
+**Priority:** P0
+
+**Status:** TODO
+
 **Depends on:** RNBP-001
 
 ## Objective

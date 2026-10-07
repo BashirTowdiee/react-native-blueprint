@@ -1,8 +1,11 @@
 # RNBP-007: Expo Router discovery adapter
 
-**Phase:** Expo Router  
-**Priority:** P1  
-**Status:** TODO  
+**Phase:** Expo Router
+
+**Priority:** P1
+
+**Status:** TODO
+
 **Depends on:** RNBP-003, RNBP-006
 
 ## Objective

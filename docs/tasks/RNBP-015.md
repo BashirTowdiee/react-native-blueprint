@@ -1,8 +1,11 @@
 # RNBP-015: Compatibility matrix, tests, docs and release readiness
 
-**Phase:** Release  
-**Priority:** P1  
-**Status:** TODO  
+**Phase:** Release
+
+**Priority:** P1
+
+**Status:** TODO
+
 **Depends on:** RNBP-007, RNBP-010, RNBP-011, RNBP-014
 
 ## Objective

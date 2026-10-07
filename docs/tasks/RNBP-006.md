@@ -1,8 +1,11 @@
 # RNBP-006: Move prototype into Expo Router example app
 
-**Phase:** Expo Router  
-**Priority:** P1  
-**Status:** TODO  
+**Phase:** Expo Router
+
+**Priority:** P1
+
+**Status:** TODO
+
 **Depends on:** RNBP-004
 
 ## Objective

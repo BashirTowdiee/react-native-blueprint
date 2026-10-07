@@ -1,8 +1,11 @@
 # RNBP-003: Screen manifest and registry API
 
-**Phase:** Core  
-**Priority:** P0  
-**Status:** TODO  
+**Phase:** Core
+
+**Priority:** P0
+
+**Status:** TODO
+
 **Depends on:** RNBP-001, RNBP-002
 
 ## Objective

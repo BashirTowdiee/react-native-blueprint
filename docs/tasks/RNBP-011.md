@@ -1,8 +1,11 @@
 # RNBP-011: Provider composition and preview context
 
-**Phase:** Preview  
-**Priority:** P1  
-**Status:** TODO  
+**Phase:** Preview
+
+**Priority:** P1
+
+**Status:** TODO
+
 **Depends on:** RNBP-004
 
 ## Objective

@@ -1,8 +1,11 @@
 # RNBP-009: React Navigation static adapter
 
-**Phase:** React Navigation  
-**Priority:** P1  
-**Status:** TODO  
+**Phase:** React Navigation
+
+**Priority:** P1
+
+**Status:** TODO
+
 **Depends on:** RNBP-003
 
 ## Objective
