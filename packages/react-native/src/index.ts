@@ -8,10 +8,16 @@ export {
 
 export {
   BlueprintPreviewHost,
+  composeReactNativePreviewWrappers,
   defaultReactNativePreviewRenderer,
+  resolveReactNativePreviewWrappers,
   type BlueprintPreviewHostProps,
   type ReactNativeBlueprintScreen,
+  type ReactNativePreviewContext,
+  type ReactNativePreviewProviderConfig,
   type ReactNativePreviewRenderer,
+  type ReactNativePreviewWrapper,
+  type ReactNativePreviewWrapperSet,
 } from './PreviewHost';
 
 export {

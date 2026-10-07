@@ -25,10 +25,38 @@ export type ReactNativePreviewRenderer = BlueprintPreviewRenderer<
   ReactNode
 >;
 
+export type ReactNativePreviewContext = {
+  screen: ReactNativeBlueprintScreen;
+  variant?: BlueprintVariant<ComponentType<any>>;
+};
+
+export type ReactNativePreviewWrapper = (
+  preview: ReactNode,
+  context: ReactNativePreviewContext,
+) => ReactNode;
+
+export type ReactNativePreviewWrapperSet = {
+  wrappers: readonly ReactNativePreviewWrapper[];
+  mode?: 'append' | 'replace';
+};
+
+export type ReactNativePreviewProviderConfig = {
+  root?: readonly ReactNativePreviewWrapper[];
+  screens?: Readonly<
+    Record<
+      string,
+      ReactNativePreviewWrapperSet & {
+        variants?: Readonly<Record<string, ReactNativePreviewWrapperSet>>;
+      }
+    >
+  >;
+};
+
 export type BlueprintPreviewHostProps = {
   screen: ReactNativeBlueprintScreen;
   variant?: BlueprintVariant<ComponentType<any>>;
   renderer?: ReactNativePreviewRenderer;
+  providers?: ReactNativePreviewProviderConfig;
   wrapPreview?: (
     preview: ReactNode,
     screen: ReactNativeBlueprintScreen,
@@ -61,10 +89,57 @@ export const defaultReactNativePreviewRenderer: ReactNativePreviewRenderer = {
   },
 };
 
+export function resolveReactNativePreviewWrappers(
+  providers: ReactNativePreviewProviderConfig | undefined,
+  screen: ReactNativeBlueprintScreen,
+  variant?: BlueprintVariant<ComponentType<any>>,
+): readonly ReactNativePreviewWrapper[] {
+  if (!providers) {
+    return [];
+  }
+
+  let wrappers = [...(providers.root ?? [])];
+  const screenConfig = providers.screens?.[screen.id];
+
+  if (screenConfig) {
+    wrappers =
+      screenConfig.mode === 'replace'
+        ? [...screenConfig.wrappers]
+        : [...wrappers, ...screenConfig.wrappers];
+
+    const variantConfig = variant
+      ? screenConfig.variants?.[variant.id]
+      : undefined;
+
+    if (variantConfig) {
+      wrappers =
+        variantConfig.mode === 'replace'
+          ? [...variantConfig.wrappers]
+          : [...wrappers, ...variantConfig.wrappers];
+    }
+  }
+
+  return wrappers.filter(
+    (wrapper, index) => wrappers.indexOf(wrapper) === index,
+  );
+}
+
+export function composeReactNativePreviewWrappers(
+  preview: ReactNode,
+  wrappers: readonly ReactNativePreviewWrapper[],
+  context: ReactNativePreviewContext,
+): ReactNode {
+  return wrappers.reduceRight(
+    (wrappedPreview, wrapper) => wrapper(wrappedPreview, context),
+    preview,
+  );
+}
+
 export function BlueprintPreviewHost({
   screen,
   variant,
   renderer = defaultReactNativePreviewRenderer,
+  providers,
   wrapPreview,
   loadingFallback = defaultLoadingFallback,
   unsupportedFallback = defaultUnsupportedFallback,
@@ -82,6 +157,7 @@ export function BlueprintPreviewHost({
         screen={screen}
         variant={variant}
         renderer={renderer}
+        providers={providers}
         wrapPreview={wrapPreview}
         loadingFallback={loadingFallback}
         unsupportedFallback={unsupportedFallback}
@@ -95,6 +171,7 @@ type PreviewContentProps = Pick<
   | 'screen'
   | 'variant'
   | 'renderer'
+  | 'providers'
   | 'wrapPreview'
   | 'loadingFallback'
   | 'unsupportedFallback'
@@ -110,6 +187,7 @@ function PreviewContent({
   screen,
   variant,
   renderer,
+  providers,
   wrapPreview,
   loadingFallback,
   unsupportedFallback,
@@ -131,9 +209,22 @@ function PreviewContent({
     throw toError(result.error, result.message);
   }
 
-  return wrapPreview
-    ? wrapPreview(result.output, screen)
-    : result.output;
+  const context: ReactNativePreviewContext = {
+    screen,
+    ...(variant ? { variant } : {}),
+  };
+  const wrappers = resolveReactNativePreviewWrappers(
+    providers,
+    screen,
+    variant,
+  );
+  const preview = composeReactNativePreviewWrappers(
+    result.output,
+    wrappers,
+    context,
+  );
+
+  return wrapPreview ? wrapPreview(preview, screen) : preview;
 }
 
 type PreviewErrorBoundaryProps = {
