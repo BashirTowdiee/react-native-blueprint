@@ -18,6 +18,10 @@ function NormalScreen() {
   return <Text testID="normal-screen">Normal screen</Text>;
 }
 
+function VariantScreen() {
+  return <Text testID="variant-screen">Variant screen</Text>;
+}
+
 const normalScreen: ReactNativeBlueprintScreen = {
   id: 'normal',
   name: 'Normal',
@@ -41,6 +45,28 @@ describe('BlueprintPreviewHost', () => {
 
     expect(view.root.findByProps({ testID: 'normal-screen' })).toBeDefined();
     expect(view.root.findByProps({ testID: 'preview-wrapper' })).toBeDefined();
+  });
+
+  it('renders a variant-specific component when the common manifest supplies one', () => {
+    let view!: ReactTestRenderer;
+
+    act(() => {
+      view = renderer.create(
+        <BlueprintPreviewHost
+          screen={normalScreen}
+          variant={{
+            id: 'fixture-one',
+            name: 'Fixture one',
+            render: VariantScreen,
+            route: {
+              params: { id: '1' },
+            },
+          }}
+        />,
+      );
+    });
+
+    expect(view.root.findByProps({ testID: 'variant-screen' })).toBeDefined();
   });
 
   it('renders loading and unsupported states from a replaceable renderer', () => {

@@ -2,6 +2,8 @@ import type {
   BlueprintMetadata,
   BlueprintScreen,
   BlueprintScreenManifest,
+  BlueprintVariant,
+  BlueprintViewport,
 } from '@react-native-blueprint/core';
 
 const ROUTE_FILE_PATTERN = /\.(?:js|jsx|ts|tsx)$/;
@@ -16,8 +18,22 @@ export type ExpoRouterRequireContext<TRender = unknown> = {
   (key: string): TRender | { default?: TRender };
 };
 
-export type ExpoRouterDiscoveryOptions = {
+export type ExpoRouterFixture<TRender = unknown> = {
+  id: string;
+  name: string;
+  params: Readonly<Record<string, unknown>>;
+  render?: TRender;
+  viewport?: BlueprintViewport;
+  data?: unknown;
+  context?: unknown;
+  metadata?: BlueprintMetadata;
+};
+
+export type ExpoRouterDiscoveryOptions<TRender = unknown> = {
   excludeFiles?: readonly string[];
+  fixtures?: Readonly<
+    Record<string, readonly ExpoRouterFixture<TRender>[]>
+  >;
 };
 
 export type ExpoRouterScreenMetadata = BlueprintMetadata & {
@@ -26,11 +42,14 @@ export type ExpoRouterScreenMetadata = BlueprintMetadata & {
   routeGroups: readonly string[];
   dynamicSegments: readonly string[];
   fixtureRequired: boolean;
+  fixtureStatus: 'not-required' | 'ready' | 'missing' | 'invalid';
+  fixtureMessage?: string;
+  fixtureIssues?: readonly string[];
 };
 
 export function discoverExpoRouterScreens<TRender>(
   entries: readonly ExpoRouterRouteEntry<TRender>[],
-  options: ExpoRouterDiscoveryOptions = {},
+  options: ExpoRouterDiscoveryOptions<TRender> = {},
 ): BlueprintScreenManifest<TRender> {
   const excluded = new Set(
     (options.excludeFiles ?? []).map(normalizeComparableFile),
@@ -39,13 +58,13 @@ export function discoverExpoRouterScreens<TRender>(
   return entries
     .filter((entry) => isScreenFile(entry.file))
     .filter((entry) => !excluded.has(normalizeComparableFile(entry.file)))
-    .map((entry) => createScreen(entry))
+    .map((entry) => createScreen(entry, options))
     .sort((left, right) => left.id.localeCompare(right.id));
 }
 
 export function discoverExpoRouterScreensFromContext<TRender>(
   context: ExpoRouterRequireContext<TRender>,
-  options: ExpoRouterDiscoveryOptions = {},
+  options: ExpoRouterDiscoveryOptions<TRender> = {},
 ): BlueprintScreenManifest<TRender> {
   const entries = context.keys().map((file) => {
     const module = context(file);
@@ -68,6 +87,7 @@ export function discoverExpoRouterScreensFromContext<TRender>(
 
 function createScreen<TRender>(
   entry: ExpoRouterRouteEntry<TRender>,
+  options: ExpoRouterDiscoveryOptions<TRender>,
 ): BlueprintScreen<TRender> {
   const routeFile = normalizeRouteFile(entry.file);
   const sourceSegments = routeFile.split('/').filter(Boolean);
@@ -85,22 +105,141 @@ function createScreen<TRender>(
     .map(getDynamicSegmentName)
     .filter((value): value is string => value !== null);
   const pathname = `/${routeSegments.join('/')}` || '/';
+  const id = `expo-router:${routeFile}`;
+  const fixtures = findFixtures(options.fixtures, entry.file, routeFile, id, pathname);
+  const fixtureResult = createFixtureVariants(
+    pathname,
+    dynamicSegments,
+    fixtures,
+  );
   const metadata: ExpoRouterScreenMetadata = {
     adapter: 'expo-router',
     file: entry.file,
     routeGroups,
     dynamicSegments,
     fixtureRequired: dynamicSegments.length > 0,
+    fixtureStatus: fixtureResult.status,
+    ...(fixtureResult.message ? { fixtureMessage: fixtureResult.message } : {}),
+    ...(fixtureResult.issues.length > 0
+      ? { fixtureIssues: fixtureResult.issues }
+      : {}),
   };
 
   return {
-    id: `expo-router:${routeFile}`,
+    id,
     name: createLabel(routeSegments),
     render: entry.render,
     route: {
       pathname,
     },
+    ...(fixtureResult.variants.length > 0
+      ? { variants: fixtureResult.variants }
+      : {}),
     metadata,
+  };
+}
+
+function findFixtures<TRender>(
+  fixtures: ExpoRouterDiscoveryOptions<TRender>['fixtures'],
+  file: string,
+  routeFile: string,
+  id: string,
+  pathname: string,
+): readonly ExpoRouterFixture<TRender>[] {
+  if (!fixtures) {
+    return [];
+  }
+
+  const candidates = new Set([
+    normalizeComparableFile(file),
+    routeFile,
+    id,
+    pathname,
+  ]);
+
+  for (const [key, values] of Object.entries(fixtures)) {
+    const comparable = key.startsWith('/') ? key : normalizeComparableFile(key);
+    if (candidates.has(comparable)) {
+      return values;
+    }
+  }
+
+  return [];
+}
+
+function createFixtureVariants<TRender>(
+  pathname: string,
+  dynamicSegments: readonly string[],
+  fixtures: readonly ExpoRouterFixture<TRender>[],
+): {
+  status: ExpoRouterScreenMetadata['fixtureStatus'];
+  message?: string;
+  issues: readonly string[];
+  variants: readonly BlueprintVariant<TRender>[];
+} {
+  if (dynamicSegments.length === 0 && fixtures.length === 0) {
+    return {
+      status: 'not-required',
+      issues: [],
+      variants: [],
+    };
+  }
+
+  if (dynamicSegments.length > 0 && fixtures.length === 0) {
+    return {
+      status: 'missing',
+      message: `Route ${pathname} requires fixture params: ${dynamicSegments.join(', ')}.`,
+      issues: [],
+      variants: [],
+    };
+  }
+
+  const issues: string[] = [];
+  const variants: BlueprintVariant<TRender>[] = [];
+
+  for (const fixture of fixtures) {
+    const missingParams = dynamicSegments.filter(
+      (segment) => !Object.prototype.hasOwnProperty.call(fixture.params, segment),
+    );
+
+    if (missingParams.length > 0) {
+      issues.push(
+        `${fixture.id} is missing params: ${missingParams.join(', ')}.`,
+      );
+      continue;
+    }
+
+    variants.push({
+      id: fixture.id,
+      name: fixture.name,
+      ...(fixture.render === undefined ? {} : { render: fixture.render }),
+      route: {
+        pathname,
+        params: fixture.params,
+      },
+      ...(fixture.viewport ? { viewport: fixture.viewport } : {}),
+      metadata: {
+        ...(fixture.metadata ?? {}),
+        adapter: 'expo-router',
+        fixtureData: fixture.data,
+        fixtureContext: fixture.context,
+      },
+    });
+  }
+
+  if (issues.length > 0) {
+    return {
+      status: 'invalid',
+      message: `Some fixtures for ${pathname} are missing required route params.`,
+      issues,
+      variants,
+    };
+  }
+
+  return {
+    status: 'ready',
+    issues: [],
+    variants,
   };
 }
 

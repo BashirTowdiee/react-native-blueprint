@@ -5,7 +5,7 @@ import type {
 
 export type BlueprintPreviewRequest<TRender = unknown> = {
   screen: BlueprintScreen<TRender>;
-  variant?: BlueprintVariant;
+  variant?: BlueprintVariant<TRender>;
 };
 
 export type BlueprintPreviewResult<TOutput = unknown> =

@@ -11,9 +11,10 @@ export type BlueprintViewport = {
   name?: string;
 };
 
-export type BlueprintVariant = {
+export type BlueprintVariant<TRender = unknown> = {
   id: string;
   name: string;
+  render?: TRender;
   route?: BlueprintRoute;
   viewport?: BlueprintViewport;
   metadata?: BlueprintMetadata;
@@ -24,7 +25,7 @@ export type BlueprintScreen<TRender = unknown> = {
   name: string;
   render: TRender;
   route?: BlueprintRoute;
-  variants?: readonly BlueprintVariant[];
+  variants?: readonly BlueprintVariant<TRender>[];
   viewport?: BlueprintViewport;
   metadata?: BlueprintMetadata;
 };

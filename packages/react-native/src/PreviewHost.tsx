@@ -27,7 +27,7 @@ export type ReactNativePreviewRenderer = BlueprintPreviewRenderer<
 
 export type BlueprintPreviewHostProps = {
   screen: ReactNativeBlueprintScreen;
-  variant?: BlueprintVariant;
+  variant?: BlueprintVariant<ComponentType<any>>;
   renderer?: ReactNativePreviewRenderer;
   wrapPreview?: (
     preview: ReactNode,
@@ -53,10 +53,10 @@ export type BlueprintPreviewHostProps = {
 };
 
 export const defaultReactNativePreviewRenderer: ReactNativePreviewRenderer = {
-  render({ screen }) {
+  render({ screen, variant }) {
     return {
       status: 'ready',
-      output: createElement(screen.render),
+      output: createElement(variant?.render ?? screen.render),
     };
   },
 };

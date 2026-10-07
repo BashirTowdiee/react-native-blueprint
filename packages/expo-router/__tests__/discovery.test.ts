@@ -44,6 +44,73 @@ describe('Expo Router discovery', () => {
       routeGroups: ['app'],
       dynamicSegments: ['id'],
       fixtureRequired: true,
+      fixtureStatus: 'missing',
+    });
+  });
+
+  it('creates deterministic variants for dynamic route fixtures', () => {
+    const PassageOne = () => null;
+    const PassageTwo = () => null;
+    const [screen] = discoverExpoRouterScreens(
+      [{ file: 'app/(app)/passage/[id].tsx', render: Passage }],
+      {
+        fixtures: {
+          '/passage/[id]': [
+            {
+              id: 'journey',
+              name: 'The Journey',
+              params: { id: '1' },
+              render: PassageOne,
+              data: { title: 'The Journey' },
+            },
+            {
+              id: 'city-dreams',
+              name: 'City Dreams',
+              params: { id: '2' },
+              render: PassageTwo,
+              context: { authenticated: true },
+            },
+          ],
+        },
+      },
+    );
+
+    expect(screen.metadata).toMatchObject({ fixtureStatus: 'ready' });
+    expect(screen.variants).toHaveLength(2);
+    expect(screen.variants?.[0]).toMatchObject({
+      id: 'journey',
+      name: 'The Journey',
+      render: PassageOne,
+      route: {
+        pathname: '/passage/[id]',
+        params: { id: '1' },
+      },
+      metadata: {
+        fixtureData: { title: 'The Journey' },
+      },
+    });
+  });
+
+  it('surfaces invalid fixture params as metadata instead of throwing', () => {
+    const [screen] = discoverExpoRouterScreens(
+      [{ file: 'app/(app)/passage/[id].tsx', render: Passage }],
+      {
+        fixtures: {
+          '/passage/[id]': [
+            {
+              id: 'missing-id',
+              name: 'Missing id',
+              params: {},
+            },
+          ],
+        },
+      },
+    );
+
+    expect(screen.variants).toBeUndefined();
+    expect(screen.metadata).toMatchObject({
+      fixtureStatus: 'invalid',
+      fixtureIssues: ['missing-id is missing params: id.'],
     });
   });
 
