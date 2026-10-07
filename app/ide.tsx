@@ -204,7 +204,6 @@ export default function IDEScreen() {
             fontSize: 14,
             fontFamily: 'monospace',
             color: '#FFFFFF',
-            whiteSpace: 'pre',
           }}
         >
           {JSON.stringify(reduxState, null, 2)}

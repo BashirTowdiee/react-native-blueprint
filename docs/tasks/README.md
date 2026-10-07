@@ -4,7 +4,7 @@ Status values: `TODO`, `IN PROGRESS`, `BLOCKED`, `DONE`.
 
 | ID | Phase | Priority | Status | Ticket | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| RNBP-001 | Foundation | P0 | TODO | Package/workspace boundaries and public API | - |
+| RNBP-001 | Foundation | P0 | DONE | Package/workspace boundaries and public API | - |
 | RNBP-002 | Core | P0 | TODO | Extract Blueprint canvas and artboard primitives | RNBP-001 |
 | RNBP-003 | Core | P0 | TODO | Screen manifest and registry API | RNBP-001, RNBP-002 |
 | RNBP-004 | Core | P0 | TODO | Preview host and rendering boundary | RNBP-003 |
@@ -22,10 +22,9 @@ Status values: `TODO`, `IN PROGRESS`, `BLOCKED`, `DONE`.
 
 ## Immediate execution order
 
-1. RNBP-001
-2. RNBP-002
-3. RNBP-003
-4. RNBP-004
-5. RNBP-005
+1. RNBP-002
+2. RNBP-003
+3. RNBP-004
+4. RNBP-005
 
 Do not start adapter automation before the explicit manifest/registry path works. Automatic discovery should build on the stable manual contract, not define it.
