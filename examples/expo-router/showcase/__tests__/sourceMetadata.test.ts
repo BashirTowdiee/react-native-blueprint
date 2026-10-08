@@ -64,3 +64,21 @@ function Profile(props) { return <Box key="one" ref={props.ref} {...props}><Text
   const code = readFileSync(resolve(__dirname, '../SocialApp.tsx'), 'utf8');
   expect(code.match(/<BlueprintInspectable\b/g)).toHaveLength(1);
 });
+
+it('records project component call sites and names forwardRef implementations, preserving original JSX refs and spreads', () => {
+  const plugin = require('../../../../packages/react-native/babel.cjs');
+  const code = `import React from 'react'; import { Text as RNText } from 'react-native'; import { Text } from './ui/Text';
+const Shared = React.forwardRef(function Shared(props, ref) { return <RNText ref={ref}>{props.children}</RNText>; });
+function Home(props) { return <Text {...props} key={props.id} ref={props.ref}>Home</Text>; }`;
+  const result = babel.transformSync(code, { filename: resolve(__dirname, '../Usage.tsx'), babelrc: false, configFile: false, parserOpts: { plugins: ['jsx'] }, plugins: [[plugin, { root: resolve(__dirname, '../../../..'), componentUsages: true }]] }).code;
+  expect(result).toContain('withBlueprintSourceUsage');
+  expect(result).toContain('owner: "Home"');
+  expect(result).toContain('component: "Text"');
+  expect(result).toContain('name: "Shared"');
+  expect(result).toContain('ref={props.ref}');
+  expect(result).toContain('key={props.id}');
+  const compiled = babel.transformSync(code, { filename: resolve(__dirname, '../Usage.tsx'), babelrc: false, configFile: false, presets: ['babel-preset-expo'], plugins: [[plugin, { root: resolve(__dirname, '../../../..'), componentUsages: true }]] });
+  expect(compiled.code).toContain('withBlueprintSourceUsage');
+  const production = babel.transformSync(code, { filename: resolve(__dirname, '../Usage.tsx'), envName: 'production', babelrc: false, configFile: false, parserOpts: { plugins: ['jsx'] }, plugins: [[plugin, { root: resolve(__dirname, '../../../..'), componentUsages: true }]] }).code;
+  expect(production).not.toContain('withBlueprintSourceUsage');
+});

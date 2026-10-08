@@ -6,6 +6,7 @@ export {
 } from './BlueprintNavigationFlow';
 
 export type { BlueprintFlowRoute, BlueprintFlowMap, BlueprintFlowLink } from '@react-native-blueprint/core';
+export type { BlueprintUsageMetadata } from './inspectionSources';
 export type { BlueprintFlowTransition } from './FlowConnections';
 
 export {
@@ -51,6 +52,7 @@ export {
 export {
   BlueprintInspectable,
   BlueprintSourceElement,
+  withBlueprintSourceUsage,
   useBlueprintPreviewViewport,
   serializeBlueprintData,
   type BlueprintComponentData,

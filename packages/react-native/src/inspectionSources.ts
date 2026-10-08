@@ -6,6 +6,12 @@ export type BlueprintElementMetadata = {
   host: string;
   location: BlueprintSourceLocation;
 };
+export type BlueprintUsageMetadata = {
+  component: string;
+  owner: string;
+  scope: 'application' | 'component';
+  location: BlueprintSourceLocation;
+};
 export type BlueprintInspectionMapping = {
   id: string;
   /** All supplied fields must match. Labels can use a prefix for repeated controls. */

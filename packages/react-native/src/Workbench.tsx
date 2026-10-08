@@ -23,7 +23,7 @@ import {
   type BlueprintSourceLocation,
   type BlueprintInspectionConfiguration,
   type BlueprintRenderedElement,
-  resolveBlueprintComponentSource,
+  resolveBlueprintComponentSources,
 } from './inspection';
 
 export function WorkbenchButton({
@@ -186,6 +186,7 @@ export function BlueprintDetails({
   const [showRendered, setShowRendered] = useState(false);
   const [showSourceHelp, setShowSourceHelp] = useState(false);
   const [showScreenInfo, setShowScreenInfo] = useState(false);
+  const [showDefinition, setShowDefinition] = useState(false);
   const contentScroll = useRef<ScrollView>(null);
   const componentPositions = useRef(new Map<string, number>());
   const [copyStatus, setCopyStatus] = useState('');
@@ -209,7 +210,8 @@ export function BlueprintDetails({
       : undefined;
   const element = snapshot.selected?.artboardId === board?.id ? snapshot.selected?.element : undefined;
   const ancestors = snapshot.selected?.artboardId === board?.id ? snapshot.selected?.ancestors ?? [] : [];
-  const source = resolveBlueprintComponentSource(snapshot.components[board?.id ?? ''] ?? {}, selected?.id);
+  const sources = resolveBlueprintComponentSources(snapshot.components[board?.id ?? ''] ?? {}, selected?.id);
+  const source = sources.usage ?? sources.definition;
   const sourceLocation = source?.location;
   const subcomponents = listedComponents.filter((component) => component.parentId === selected?.id && selected);
   useEffect(() => {
@@ -324,16 +326,20 @@ export function BlueprintDetails({
             ].map(([t, shortLabel, icon]) => <WorkbenchButton key={t} label={t} shortLabel={shortLabel} icon={icon} variant="tab" active={tab === t} onPress={() => setTab(t)} />)}
           </View>
           {(selected || element) && (tab === 'Components' || tab === 'Data') ? <View style={s.selectionSummary} testID="blueprint-selected-component">
-            <Text numberOfLines={2} style={s.selectionName}>{selected?.name ?? element?.label ?? 'Unregistered element'}</Text>
+            <Text numberOfLines={2} style={s.selectionName}>{sources.usage?.component.usage ? `${sources.usage.component.usage.component} in ${sources.usage.component.usage.owner}` : selected?.name ?? element?.label ?? 'Unregistered element'}</Text>
             <Text style={s.methodLabel} testID="blueprint-selected-methods">{(selected?.methods ?? []).map((method) => method === 'automatic' ? 'Automatic metadata' : method === 'config' ? 'Config mapping' : 'Wrapped example').join(' + ') || 'Exposed region'}{selected?.mappingId ? ` · ${selected.mappingId}` : ''}</Text>
             {sourceLocation ? <>
               <Text selectable numberOfLines={1} ellipsizeMode="middle" style={s.selectionPath} testID="blueprint-source-location">{`${sourceLocation.file}${sourceLocation.line ? `:${sourceLocation.line}${sourceLocation.column ? `:${sourceLocation.column}` : ''}` : ''}`}</Text>
-              {source?.component.id !== selected?.id ? <Text style={s.methodLabel}>Source context from {source?.component.name}</Text> : null}
+              <Text style={s.methodLabel}>{sources.usage ? 'Usage in your application' : source?.component.id !== selected?.id ? `Source context from ${source?.component.name}` : 'Rendered element implementation'}</Text>
               <View style={s.inlineActions}>
                 <WorkbenchButton label="Copy file path" shortLabel="Copy path" variant="text" testID="blueprint-copy-source" onPress={() => copyText(sourceLocation.file, 'file path')} />
                 {sourceLocation.line ? <WorkbenchButton label="Copy location" shortLabel="Copy location" variant="text" testID="blueprint-copy-location" onPress={() => copyText(`${sourceLocation.file}:${sourceLocation.line}${sourceLocation.column ? `:${sourceLocation.column}` : ''}`, 'source location')} /> : null}
                 {onOpenSource ? <WorkbenchButton label="Open source" shortLabel="Open" variant="text" testID="blueprint-open-source" onPress={() => onOpenSource(sourceLocation)} /> : null}
               </View>
+              {sources.usage && sources.definition ? <>
+                <WorkbenchButton label={showDefinition ? 'Hide component definition' : 'Show component definition'} shortLabel={showDefinition ? 'Definition −' : 'Definition +'} variant="text" onPress={() => setShowDefinition(!showDefinition)} />
+                {showDefinition ? <><Text style={s.methodLabel}>Rendered element: {sources.definition.component.name}</Text><Text selectable style={s.selectionPath} testID="blueprint-definition-location">{`${sources.definition.location.file}:${sources.definition.location.line ?? ''}`}</Text><WorkbenchButton label="Copy definition path" variant="text" onPress={() => copyText(sources.definition!.location.file, 'definition path')} /></> : null}
+              </> : null}
             </> : <Text style={s.methodLabel} testID="blueprint-source-location">File not exposed for this component</Text>}
           </View> : null}
           {board.placeholder ? <Text style={s.muted}>This screen is unmounted. Follow a navigation path to mount it.</Text> : null}

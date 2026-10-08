@@ -46,3 +46,28 @@ it('can disable automatic registration while keeping matched config elements', (
   act(() => tree.unmount());
   expect(matchBlueprintInspectionMapping([{ id: 'a', match: {}, name: 'Bad' }, { id: 'b', match: { accessibilityLabel: { prefix: 'Open ' }, host: 'View' }, name: 'Good' }], metadata, { accessibilityLabel: 'Open thread post-1' })?.id).toBe('b');
 });
+
+it('resolves a screen usage separately from a shared implementation without extra host views or lost refs', () => {
+  const { withBlueprintSourceUsage, resolveBlueprintComponentSources, resolveBlueprintRenderTarget } = require('../src/inspection');
+  const store = createInspectionStore();
+  const ref = React.createRef<any>();
+  const usage = { component: 'Shared', owner: 'Home', scope: 'application', location: { file: 'src/Home.tsx', line: 12 } };
+  const shared = { component: 'Text', owner: 'Shared', scope: 'component', location: { file: 'src/ui/Shared.tsx', line: 7 } };
+  const Shared = React.forwardRef<any>((props, forwarded) => withBlueprintSourceUsage(<BlueprintSourceElement ref={forwarded} blueprintHost={Text} blueprintSource={metadata}>Label</BlueprintSourceElement>, shared));
+  const element = <Shared key="stable" ref={ref} />;
+  const wrapped = withBlueprintSourceUsage(element, usage);
+  expect(wrapped.key).toBe(element.key);
+  let tree!: TestRenderer.ReactTestRenderer;
+  act(() => { tree = TestRenderer.create(<BlueprintInspectionProvider store={store} artboardId="app" inspecting={false} viewport={{width:390,height:844}} onSelect={() => {}}>{wrapped}</BlueprintInspectionProvider>, { createNodeMock: () => ({ measureInWindow() {} }) }); });
+  const components = store.getSnapshot().components.app;
+  const host = Object.values(components).find((c: any) => c.sourceKind === 'definition')!;
+  const sources = resolveBlueprintComponentSources(components, host.id);
+  expect(sources.usage.location).toEqual(usage.location);
+  expect(sources.definition.location).toEqual(metadata.location);
+  expect(resolveBlueprintRenderTarget(components, sources.usage.component.id)).toBe(host.id);
+  expect(tree.root.findAllByType(Text)).toHaveLength(1);
+  expect(ref.current).toBeTruthy();
+  act(() => tree.unmount());
+  expect(ref.current).toBeNull();
+  expect(store.getSnapshot().components.app).toEqual({});
+});

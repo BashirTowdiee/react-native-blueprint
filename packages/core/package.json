@@ -1,6 +1,6 @@
 {
   "name": "@react-native-blueprint/core",
-  "version": "0.2.0-dev.1",
+  "version": "0.2.0-dev.2",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

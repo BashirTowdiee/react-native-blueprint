@@ -27,7 +27,7 @@ import {
   type BlueprintValueChange,
 } from './dataTools';
 export { serializeBlueprintData } from './dataTools';
-import { matchBlueprintInspectionMapping, type BlueprintElementMetadata, type BlueprintInspectionConfiguration, type BlueprintInspectionMethod } from './inspectionSources';
+import { matchBlueprintInspectionMapping, type BlueprintElementMetadata, type BlueprintUsageMetadata, type BlueprintInspectionConfiguration, type BlueprintInspectionMethod } from './inspectionSources';
 export type { BlueprintInspectionConfiguration, BlueprintInspectionMapping, BlueprintInspectionMethod, BlueprintDevToolsConnection, BlueprintDevToolsStatus } from './inspectionSources';
 const ConfigurationContext = createContext<BlueprintInspectionConfiguration | undefined>(undefined);
 export const BlueprintInspectionConfigurationProvider = ConfigurationContext.Provider;
@@ -47,7 +47,26 @@ export type BlueprintComponentData = {
   data?: unknown;
   methods?: readonly BlueprintInspectionMethod[];
   mappingId?: string;
+  sourceKind?: 'usage' | 'definition';
+  usage?: { component: string; owner: string; scope: 'application' | 'component' };
 };
+/** Prefer the closest application call site, retaining shared implementation data. */
+export function resolveBlueprintComponentSources(components: Record<string, BlueprintComponentData>, id?: string) {
+  const seen = new Set<string>();
+  const usages: { component: BlueprintComponentData; location: BlueprintSourceLocation }[] = [];
+  let definition: { component: BlueprintComponentData; location: BlueprintSourceLocation } | undefined;
+  let component = id ? components[id] : undefined;
+  while (component && !seen.has(component.id) && seen.size < 256) {
+    seen.add(component.id);
+    const location = component.sourceLocation ?? (component.source ? { file: component.source.split('#')[0] } : undefined);
+    if (location?.file) {
+      if (component.sourceKind === 'usage') usages.push({ component, location });
+      else definition ??= { component, location };
+    }
+    component = component.parentId ? components[component.parentId] : undefined;
+  }
+  return { usage: usages.find(entry => entry.component.usage?.scope === 'application') ?? usages[0], definition, usages };
+}
 export function resolveBlueprintComponentSource(components: Record<string, BlueprintComponentData>, id?: string) {
   const seen = new Set<string>();
   let component = id ? components[id] : undefined;
@@ -384,7 +403,7 @@ export const BlueprintSourceElement = forwardRef<any, {
     if (!enabled || !context) return;
     context.store.register(context.artboardId, {
       id, name: mapping?.name ?? `${metadata.name} · ${metadata.host}`,
-      sourceLocation: location, parentId, data,
+      sourceLocation: location, sourceKind: 'definition', parentId, data,
       methods: mapping ? context.configuration?.automatic === false ? ['config'] : ['automatic', 'config'] : ['automatic'], mappingId: mapping?.id,
     });
   }, [context?.store, context?.artboardId, enabled, id, metadata.name, metadata.host, location.file, location.line, location.column, parentId, mapping?.id, mapping?.name, data]);
@@ -399,14 +418,50 @@ export const BlueprintSourceElement = forwardRef<any, {
   return enabled ? <ParentComponent.Provider value={id}>{host}</ParentComponent.Provider> : host;
 });
 
+function BlueprintSourceUsage({ blueprintUsage: metadata, children }: { blueprintUsage: BlueprintUsageMetadata; children: React.ReactElement }) {
+  const context = useContext(InspectionContext);
+  const parentId = useContext(ParentComponent);
+  const id = `usage-${useId()}`;
+  const enabled = !!context && context.configuration?.automatic !== false;
+  const data = serializeBlueprintData({ component: metadata.component, owner: metadata.owner });
+  useEffect(() => {
+    if (!enabled || !context) return;
+    context.store.register(context.artboardId, { id, name: `${metadata.component} · ${metadata.owner}`, sourceLocation: metadata.location,
+      sourceKind: 'usage', usage: { component: metadata.component, owner: metadata.owner, scope: metadata.scope }, parentId, data, methods: ['automatic'] });
+    return () => context.store.remove(context.artboardId, id);
+  }, [context?.store, context?.artboardId, enabled, id, metadata.component, metadata.owner, metadata.scope, metadata.location.file, metadata.location.line, metadata.location.column, parentId, data]);
+  return enabled ? <ParentComponent.Provider value={id}>{children}</ParentComponent.Provider> : children;
+}
+/** Compiler helper. React element keys/refs and the consumer's JSX runtime stay intact. */
+export function withBlueprintSourceUsage(element: React.ReactElement, metadata: BlueprintUsageMetadata): React.ReactElement {
+  return React.createElement(BlueprintSourceUsage, { key: element.key, blueprintUsage: metadata, children: element });
+}
+
 const configuredNodes = new WeakMap<Element, string>();
 let configuredNodeSequence = 0;
 const renderedNodes = new WeakMap<BlueprintRenderedElement, Element>();
-export function highlightBlueprintSelection(root: HTMLElement, selection?: InspectionSnapshot['selected']) {
+export function resolveBlueprintRenderTarget(components: Record<string, BlueprintComponentData>, id?: string) {
+  if (!id || components[id]?.sourceKind !== 'usage') return id;
+  let target: string | undefined;
+  let distance = Infinity;
+  for (const component of Object.values(components)) {
+    if (component.sourceKind === 'usage') continue;
+    let parent = component.parentId;
+    const seen = new Set<string>();
+    while (parent && !seen.has(parent) && seen.size < 256) {
+      seen.add(parent);
+      if (parent === id) { if (seen.size < distance) { target = component.id; distance = seen.size; } break; }
+      parent = components[parent]?.parentId;
+    }
+  }
+  return target;
+}
+export function highlightBlueprintSelection(root: HTMLElement, selection?: InspectionSnapshot['selected'], components: Record<string, BlueprintComponentData> = {}) {
   if (!selection?.componentId && !selection?.element) return () => {};
   const rendered = selection?.element && renderedNodes.get(selection.element);
+  const targetId = resolveBlueprintRenderTarget(components, selection?.componentId);
   const node = rendered && root.contains(rendered) ? rendered :
-    Array.from(root.querySelectorAll('[data-testid^="blueprint-region-"], [data-blueprint-id], [data-testid], [aria-label]')).find((element) => (configuredNodes.get(element) ?? element.getAttribute('data-blueprint-id') ?? (element.getAttribute('data-testid')?.startsWith('blueprint-region-') ? element.getAttribute('data-testid')?.slice('blueprint-region-'.length) : undefined)) === selection?.componentId);
+    Array.from(root.querySelectorAll('[data-testid^="blueprint-region-"], [data-blueprint-id], [data-testid], [aria-label]')).find((element) => (configuredNodes.get(element) ?? element.getAttribute('data-blueprint-id') ?? (element.getAttribute('data-testid')?.startsWith('blueprint-region-') ? element.getAttribute('data-testid')?.slice('blueprint-region-'.length) : undefined)) === targetId);
   if (!(node instanceof HTMLElement)) return () => {};
   const previous = { outline: node.style.outline, offset: node.style.outlineOffset };
   node.style.outline = '2px solid #4dd9b4';
@@ -520,9 +575,17 @@ export function observeBlueprintVisibleComponents(root: HTMLElement, store: Insp
       if (node.getClientRects().length > 0) configuredVisible.push(id);
     });
     for (const id of registered.keys()) if (!currentIds.has(id)) { store.remove(artboardId, id); registered.delete(id); }
-    store.setVisibleComponents(artboardId, Array.from(root.querySelectorAll('[data-testid^="blueprint-region-"], [data-blueprint-id]'))
+    const visible = Array.from(root.querySelectorAll('[data-testid^="blueprint-region-"], [data-blueprint-id]'))
       .filter((element) => element.getClientRects().length > 0)
-      .map((element) => (element.getAttribute('data-blueprint-id') ?? element.getAttribute('data-testid')!.slice('blueprint-region-'.length))).concat(configuredVisible));
+      .map((element) => (element.getAttribute('data-blueprint-id') ?? element.getAttribute('data-testid')!.slice('blueprint-region-'.length))).concat(configuredVisible);
+    const components = store.getSnapshot().components[artboardId] ?? {};
+    const expanded = new Set(visible);
+    for (const id of visible) {
+      let parent = components[id]?.parentId;
+      const seen = new Set<string>();
+      while (parent && !seen.has(parent) && seen.size < 256) { seen.add(parent); expanded.add(parent); parent = components[parent]?.parentId; }
+    }
+    store.setVisibleComponents(artboardId, [...expanded]);
   };
   const schedule = () => { if (!scheduled) scheduled = window.requestAnimationFrame(measure); };
   const observer = new window.MutationObserver(schedule);
@@ -562,7 +625,7 @@ export function BlueprintElementPicker({ children }: { children: ReactNode }) {
     });
     return () => { cancelled = true; cancelAnimationFrame(frame); };
   }, [context?.inspecting, context?.nativeTargets, ids, selection]);
-  const selectedBounds = selection?.artboardId === context?.artboardId ? bounds.find((box) => box.id === selection?.componentId) : undefined;
+  const selectedBounds = selection?.artboardId === context?.artboardId ? bounds.find((box) => box.id === resolveBlueprintRenderTarget(context?.store.getSnapshot().components[context.artboardId] ?? {}, selection?.componentId)) : undefined;
   useEffect(() => {
     if (Platform.OS !== 'web' || !context) return;
     const root = ref.current as unknown as HTMLElement | null;
@@ -573,7 +636,7 @@ export function BlueprintElementPicker({ children }: { children: ReactNode }) {
     if (Platform.OS !== 'web' || !context) return;
     const root = ref.current as unknown as HTMLElement | null;
     if (!root?.querySelectorAll) return;
-    return highlightBlueprintSelection(root, selection?.artboardId === context.artboardId ? selection : undefined);
+    return highlightBlueprintSelection(root, selection?.artboardId === context.artboardId ? selection : undefined, context.store.getSnapshot().components[context.artboardId] ?? {});
   }, [selection, context?.artboardId, context?.inspecting]);
   useEffect(() => {
     if (Platform.OS !== 'web' || !context?.inspecting) return;

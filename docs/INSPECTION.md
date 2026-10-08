@@ -36,6 +36,20 @@ plugins: development ? [['@react-native-blueprint/react-native/babel', {
 ```
 
 The plugin instruments named imports of React Native hosts (including aliases),
+and can record project component call sites with `componentUsages: true`.
+Use `componentDirectories` to identify shared UI folders, relative to `root`.
+For example, `componentDirectories: ['src/components/']` lets the picker prioritize
+the nearest screen usage outside those folders. Local components and relative
+imports are supported; third-party imports and Context Provider/Consumer nodes
+are excluded. The original JSX element, its key, refs, props and JSX runtime are
+retained inside a context boundary, without adding a layout view.
+
+For abstracted elements, the source summary shows **where it is used** first.
+**Definition** expands the rendered element's implementation location separately.
+Both positions come from the compiler; the usage path may identify a containing
+component, such as a Heading used by HomeScreen, rather than its internal Text.
+
+The host instrumentation works
 without changing application source or adding host layout views. It inserts a
 `BlueprintSourceElement` React component that preserves keys, refs, props and
 children. Compiler locations identify the exact host JSX opening tag; names
