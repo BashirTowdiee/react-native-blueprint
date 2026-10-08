@@ -55,8 +55,8 @@ export default function BlueprintRoute() {
 ```
 
 Dynamic routes can define fixtures and variants through
-`discoverExpoRouterScreensFromContext`. See the Expo example and adapter tests
-for the fixture contract.
+`discoverExpoRouterScreensFromContext`. See the adapter tests for the fixture
+contract. The current Expo showcase uses an explicit social screen manifest.
 
 ## React Navigation
 

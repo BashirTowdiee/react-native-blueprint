@@ -28,3 +28,13 @@ Status values: `TODO`, `IN PROGRESS`, `BLOCKED`, `DONE`.
 4. RNBP-005
 
 Do not start adapter automation before the explicit manifest/registry path works. Automatic discovery should build on the stable manual contract, not define it.
+
+## IDE uplift
+
+| ID | Priority | Status | Ticket |
+| --- | --- | --- | --- |
+| RNBP-016 | P1 | BLOCKED | [Inspection workbench and production-scale showcase](RNBP-016.md) — local implementation verified; upstream runtime awaits dependency installation approval |
+| RNBP-017 | P1 | DONE | [All-screen previews and app navigation lifecycle](RNBP-017.md) — public API and local showcase verified in tests and browser |
+| RNBP-018 | P1 | DONE | [Navigation flow canvas](RNBP-018.md) |
+| RNBP-019 | P1 | DONE | [Source-first component selection](RNBP-019.md) |
+| RNBP-020 | P1 | DONE | [Optional inspection sources and compact Details drawer](RNBP-020.md) — public contracts and live local web verified; native device validation separate |

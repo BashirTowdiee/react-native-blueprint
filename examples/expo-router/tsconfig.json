@@ -2,27 +2,13 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "moduleResolution": "Bundler",
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
+    "moduleResolution": "Bundler"
   },
   "include": [
     "app/**/*.ts",
     "app/**/*.tsx",
-    "components/**/*.ts",
-    "components/**/*.tsx",
-    "constants/**/*.ts",
-    "constants/**/*.tsx",
-    "design-system/**/*.ts",
-    "design-system/**/*.tsx",
-    "hooks/**/*.ts",
-    "hooks/**/*.tsx",
-    "utils/**/*.ts",
-    "utils/**/*.tsx",
-    "store.ts",
+    "showcase/**/*.ts",
+    "showcase/**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ]

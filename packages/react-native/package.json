@@ -12,12 +12,24 @@
     "./dev": {
       "types": "./dist/dev.d.ts",
       "default": "./dist/dev.js"
+    },
+    "./babel": {
+      "types": "./babel.d.cts",
+      "default": "./babel.cjs"
+    },
+    "./devtools": {
+      "types": "./devtools.d.cts",
+      "default": "./devtools.cjs"
     }
   },
   "files": [
     "dist",
     "dev.js",
-    "dev.d.ts"
+    "dev.d.ts",
+    "babel.cjs",
+    "babel.d.cts",
+    "devtools.cjs",
+    "devtools.d.cts"
   ],
   "sideEffects": false,
   "publishConfig": {

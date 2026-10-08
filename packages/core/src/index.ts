@@ -1,4 +1,15 @@
 export {
+  createBlueprintFlowState,
+  navigateBlueprintFlow,
+  backBlueprintFlow,
+  type BlueprintFlowRoute,
+  type BlueprintFlowLink,
+  type BlueprintFlowMap,
+  type BlueprintFlowNode,
+  type BlueprintFlowState,
+} from './navigationFlow';
+
+export {
   BlueprintRegistryError,
   createBlueprintScreenRegistry,
   defineBlueprintScreen,

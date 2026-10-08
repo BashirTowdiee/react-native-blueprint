@@ -146,3 +146,14 @@ describe('Expo Router discovery', () => {
     ]);
   });
 });
+
+
+it('does not evaluate excluded routes or layouts during context discovery', () => {
+  const context = jest.fn((file: string) => {
+    if (file !== './home.tsx') throw new Error('Excluded module executed');
+    return { default: Home };
+  }) as unknown as ExpoRouterRequireContext<typeof Home>;
+  context.keys = () => ['./home.tsx', './_layout.tsx', './+not-found.tsx', './ide.tsx'];
+  expect(discoverExpoRouterScreensFromContext(context, { excludeFiles: ['./ide.tsx'] })).toHaveLength(1);
+  expect(context).toHaveBeenCalledTimes(1);
+});

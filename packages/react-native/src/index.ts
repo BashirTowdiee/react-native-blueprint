@@ -1,4 +1,22 @@
 export {
+  BlueprintNavigationFlow,
+  useBlueprintFlowNavigation,
+  type BlueprintFlowNavigation,
+  type BlueprintNavigationFlowConfig,
+} from './BlueprintNavigationFlow';
+
+export type { BlueprintFlowRoute, BlueprintFlowMap, BlueprintFlowLink } from '@react-native-blueprint/core';
+export type { BlueprintFlowTransition } from './FlowConnections';
+
+export {
+  BlueprintWorkspace,
+  useBlueprintNavigationReporter,
+  type BlueprintWorkspaceMode,
+  type BlueprintWorkspaceProps,
+  type BlueprintNavigationRoute,
+} from './BlueprintWorkspace';
+
+export {
   BlueprintArtboard,
   BlueprintView,
   BLUEPRINT_DEVICE_PRESETS,
@@ -29,3 +47,25 @@ export {
   DEFAULT_BLUEPRINT_MIN_ZOOM,
   DEFAULT_BLUEPRINT_ZOOM_STEP,
 } from './zoom';
+
+export {
+  BlueprintInspectable,
+  BlueprintSourceElement,
+  useBlueprintPreviewViewport,
+  serializeBlueprintData,
+  type BlueprintComponentData,
+  type BlueprintInspectionConfiguration,
+  type BlueprintInspectionMapping,
+  type BlueprintInspectionMethod,
+  type BlueprintDevToolsConnection,
+  type BlueprintDevToolsStatus,
+  type BlueprintSourceLocation,
+  type BlueprintRenderedElement,
+  type BlueprintRenderMetrics,
+} from './inspection';
+
+export {
+  compareBlueprintSnapshots,
+  type BlueprintValueChange,
+  type BlueprintSnapshotDifference,
+} from './dataTools';

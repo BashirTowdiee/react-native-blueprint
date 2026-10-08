@@ -8,14 +8,14 @@ const examples = [
     name: 'Expo Router',
     file: 'examples/expo-router/app/(ide)/ide.tsx',
     required: [
-      '@react-native-blueprint/expo-router',
       '@react-native-blueprint/react-native',
       '@react-native-blueprint/react-native/dev',
-      'discoverExpoRouterScreensFromContext',
+      'socialManifest',
+      'socialFlow',
+      'SocialNavigationApp',
       'BlueprintPreviewHost',
-      'BlueprintView',
+      'BlueprintWorkspace',
       'isBlueprintDevelopmentEnabled',
-      'require.context',
     ],
   },
   {

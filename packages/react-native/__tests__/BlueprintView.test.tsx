@@ -1,20 +1,14 @@
 import React from 'react';
-import { Text } from 'react-native';
-import renderer, {
-  act,
-  type ReactTestRenderer,
-} from 'react-test-renderer';
+import { ScrollView, Text } from 'react-native';
+import renderer, { act, type ReactTestRenderer } from 'react-test-renderer';
 
-import {
-  BlueprintView,
-  createBlueprintViewportFromPreset,
-} from '../src';
+import { BlueprintView, createBlueprintViewportFromPreset } from '../src';
 
 describe('BlueprintView', () => {
-  it('renders data-driven artboards and keeps zoom controls bounded', () => {
+  it('renders data-driven artboards and keeps zoom controls bounded', async () => {
     let view!: ReactTestRenderer;
 
-    act(() => {
+    await act(async () => {
       view = renderer.create(
         <BlueprintView
           artboards={[
@@ -49,7 +43,7 @@ describe('BlueprintView', () => {
       view.root.findByProps({ testID: 'blueprint-zoom-value' }).props.children,
     ).toBe('150%');
 
-    act(() => {
+    await act(async () => {
       view.root.findByProps({ testID: 'blueprint-zoom-in' }).props.onPress();
     });
 
@@ -57,7 +51,7 @@ describe('BlueprintView', () => {
       view.root.findByProps({ testID: 'blueprint-zoom-value' }).props.children,
     ).toBe('150%');
 
-    act(() => {
+    await act(async () => {
       view.root.findByProps({ testID: 'blueprint-zoom-out' }).props.onPress();
     });
 
@@ -66,10 +60,10 @@ describe('BlueprintView', () => {
     ).toBe('140%');
   });
 
-  it('groups variants, selects artboards and exposes viewport metadata', () => {
+  it('groups variants, selects artboards and exposes viewport metadata', async () => {
     let view!: ReactTestRenderer;
 
-    act(() => {
+    await act(async () => {
       view = renderer.create(
         <BlueprintView
           artboards={[
@@ -101,11 +95,13 @@ describe('BlueprintView', () => {
       );
     });
 
-    expect(view.root.findByProps({ testID: 'blueprint-group-login' })).toBeDefined();
+    expect(
+      view.root.findByProps({ testID: 'blueprint-group-login' }),
+    ).toBeDefined();
 
-    act(() => {
+    await act(async () => {
       view.root
-        .findByProps({ testID: 'blueprint-artboard-login:default' })
+        .findByProps({ testID: 'blueprint-artboard-login:default-select' })
         .props.onPress();
     });
 
@@ -117,16 +113,17 @@ describe('BlueprintView', () => {
         testID: 'blueprint-artboard-login:default-viewport',
       }).props.children,
     ).toContain('390 × 844');
+    await act(async () => view.root.findAllByProps({ accessibilityLabel: 'Show screen info' }).find((node) => node.props.onPress)!.props.onPress());
     expect(
       view.root.findByProps({ testID: 'blueprint-inspector-metadata' }).props
         .children,
     ).toContain('expo-router');
   });
 
-  it('resets zoom and selection to their configured defaults', () => {
+  it('resets zoom and selection to their configured defaults', async () => {
     let view!: ReactTestRenderer;
 
-    act(() => {
+    await act(async () => {
       view = renderer.create(
         <BlueprintView
           artboards={[
@@ -147,10 +144,10 @@ describe('BlueprintView', () => {
       );
     });
 
-    act(() => {
+    await act(async () => {
       view.root.findByProps({ testID: 'blueprint-zoom-in' }).props.onPress();
       view.root
-        .findByProps({ testID: 'blueprint-artboard-second' })
+        .findByProps({ testID: 'blueprint-artboard-second-select' })
         .props.onPress();
     });
 
@@ -158,7 +155,7 @@ describe('BlueprintView', () => {
       view.root.findByProps({ testID: 'blueprint-inspector-second' }),
     ).toBeDefined();
 
-    act(() => {
+    await act(async () => {
       view.root.findByProps({ testID: 'blueprint-reset' }).props.onPress();
     });
 
@@ -170,10 +167,10 @@ describe('BlueprintView', () => {
     ).toBeDefined();
   });
 
-  it('fits and recentres a horizontal canvas containing all screen groups', () => {
+  it('fits and recentres a horizontal canvas containing all screen groups', async () => {
     let view!: ReactTestRenderer;
 
-    act(() => {
+    await act(async () => {
       view = renderer.create(
         <BlueprintView
           artboards={[
@@ -198,39 +195,41 @@ describe('BlueprintView', () => {
       );
     });
 
-    act(() => {
-      view.root.findByProps({ testID: 'blueprint-workspace' }).props.onLayout({
-        nativeEvent: {
-          layout: {
-            width: 1000,
-            height: 800,
+    await act(async () => {
+      view.root
+        .findByProps({ testID: 'blueprint-canvas-workspace' })
+        .props.onLayout({
+          nativeEvent: {
+            layout: {
+              width: 1000,
+              height: 800,
+            },
           },
-        },
-      });
+        });
     });
 
     expect(
       view.root.findByProps({ testID: 'blueprint-zoom-value' }).props.children,
-    ).toBe('93%');
+    ).toBe('85%');
 
-    act(() => {
+    await act(async () => {
       view.root.findByProps({ testID: 'blueprint-zoom-in' }).props.onPress();
     });
 
     expect(
       view.root.findByProps({ testID: 'blueprint-zoom-value' }).props.children,
-    ).toBe('98%');
+    ).toBe('90%');
 
-    act(() => {
+    await act(async () => {
       view.root.findByProps({ testID: 'blueprint-fit' }).props.onPress();
     });
 
     expect(
       view.root.findByProps({ testID: 'blueprint-zoom-value' }).props.children,
-    ).toBe('93%');
+    ).toBe('85%');
   });
 
-  it('provides device presets while allowing arbitrary custom viewports', () => {
+  it('provides device presets while allowing arbitrary custom viewports', async () => {
     expect(createBlueprintViewportFromPreset('phone-standard')).toEqual({
       name: 'Standard phone',
       width: 390,
@@ -240,4 +239,60 @@ describe('BlueprintView', () => {
       RangeError,
     );
   });
+});
+
+
+it('offers Focus active after panning or zooming away and restores framing without a remount', async () => {
+  let mounts = 0;
+  function Screen() {
+    React.useEffect(() => { mounts++; }, []);
+    return <Text>Active content</Text>;
+  }
+  let view!: ReactTestRenderer;
+  await act(async () => { view = renderer.create(<BlueprintView
+    artboards={[{ id: 'active', label: 'Active', width: 390, height: 844, content: <Screen /> }]}
+    layout="hierarchy" focusRequest={{ id: 'active', sequence: 0 }} initialZoom={0.65} fitOnMount={false}
+  />); });
+  await act(async () => view.root.findByProps({ testID: 'blueprint-canvas-workspace' }).props.onLayout({ nativeEvent: { layout: { width: 600, height: 700 } } }));
+  const scrolls = () => view.root.findAllByType(ScrollView).filter((node) => node.props.onScroll);
+  await act(async () => {
+    scrolls()[0].props.onScroll({ nativeEvent: { contentOffset: { y: 338 } } });
+    scrolls()[1].props.onScroll({ nativeEvent: { contentOffset: { x: 165.75 } } });
+  });
+  expect(view.root.findAllByProps({ testID: 'blueprint-focus-active' })).toHaveLength(0);
+  await act(async () => view.root.findByProps({ testID: 'blueprint-zoom-out' }).props.onPress());
+  expect(view.root.findByProps({ testID: 'blueprint-focus-active' })).toBeDefined();
+  await act(async () => view.root.findByProps({ testID: 'blueprint-focus-active' }).props.onPress());
+  expect(view.root.findByProps({ testID: 'blueprint-zoom-value' }).props.children).toBe('65%');
+  expect(view.root.findAllByProps({ testID: 'blueprint-focus-active' })).toHaveLength(0);
+  await act(async () => scrolls()[0].props.onScroll({ nativeEvent: { contentOffset: { y: 700 } } }));
+  expect(view.root.findByProps({ testID: 'blueprint-focus-active' })).toBeDefined();
+  expect(mounts).toBe(1);
+  await act(async () => view.unmount());
+});
+
+it('uses one web scroll surface and observes both camera coordinates in the same scroll event', async () => {
+  const { Platform } = require('react-native');
+  const os = Object.getOwnPropertyDescriptor(Platform, 'OS')!;
+  Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+  let view: ReactTestRenderer | undefined;
+  let mounts = 0;
+  function Screen() { React.useEffect(() => { mounts++; }, []); return <Text>Active</Text>; }
+  try {
+    await act(async () => { view = renderer.create(<BlueprintView
+      artboards={[{ id: 'active', label: 'Active', width: 390, height: 844, content: <Screen /> }]}
+      layout="hierarchy" focusRequest={{ id: 'active', sequence: 0 }} initialZoom={0.65} fitOnMount={false}
+    />); });
+    await act(async () => view!.root.findByProps({ testID: 'blueprint-canvas-workspace' }).props.onLayout({ nativeEvent: { layout: { width: 600, height: 700 } } }));
+    expect(view!.root.findAllByProps({ testID: 'blueprint-canvas-scroll-x' })).toHaveLength(0);
+    expect(view!.root.findAllByProps({ testID: 'blueprint-canvas-scroll-y' })).toHaveLength(0);
+    await act(async () => view!.root.findByProps({ testID: 'blueprint-canvas-scroll' }).props.onScroll({ nativeEvent: { contentOffset: { x: 165.75, y: 338 } } }));
+    expect(view!.root.findAllByProps({ testID: 'blueprint-focus-active' })).toHaveLength(0);
+    await act(async () => view!.root.findByProps({ testID: 'blueprint-canvas-scroll' }).props.onScroll({ nativeEvent: { contentOffset: { x: 300, y: 500 } } }));
+    expect(view!.root.findByProps({ testID: 'blueprint-focus-active' })).toBeDefined();
+    expect(mounts).toBe(1);
+  } finally {
+    if (view) await act(async () => view!.unmount());
+    Object.defineProperty(Platform, 'OS', os);
+  }
 });

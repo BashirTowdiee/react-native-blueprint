@@ -66,7 +66,9 @@ export function discoverExpoRouterScreensFromContext<TRender>(
   context: ExpoRouterRequireContext<TRender>,
   options: ExpoRouterDiscoveryOptions<TRender> = {},
 ): BlueprintScreenManifest<TRender> {
-  const entries = context.keys().map((file) => {
+  const excluded = new Set((options.excludeFiles ?? []).map(normalizeComparableFile));
+  // Do not evaluate IDE routes, layouts or special files just to discard them.
+  const entries = context.keys().filter(file => isScreenFile(file) && !excluded.has(normalizeComparableFile(file))).map((file) => {
     const module = context(file);
     const render = isDefaultModule(module) ? module.default : module;
 

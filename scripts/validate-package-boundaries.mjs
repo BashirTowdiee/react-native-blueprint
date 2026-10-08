@@ -4,7 +4,7 @@ import { join } from 'node:path';
 const root = process.cwd();
 const expected = new Map([
   ['core', { name: '@react-native-blueprint/core', internal: [], exports: ['.'] }],
-  ['react-native', { name: '@react-native-blueprint/react-native', internal: ['@react-native-blueprint/core'], exports: ['.', './dev'] }],
+  ['react-native', { name: '@react-native-blueprint/react-native', internal: ['@react-native-blueprint/core'], exports: ['.', './dev', './babel', './devtools'] }],
   ['expo-router', { name: '@react-native-blueprint/expo-router', internal: ['@react-native-blueprint/core'], exports: ['.'] }],
   ['react-navigation', { name: '@react-native-blueprint/react-navigation', internal: ['@react-native-blueprint/core'], exports: ['.'] }],
   ['plugin-redux', { name: '@react-native-blueprint/plugin-redux', internal: ['@react-native-blueprint/core'], exports: ['.'] }],

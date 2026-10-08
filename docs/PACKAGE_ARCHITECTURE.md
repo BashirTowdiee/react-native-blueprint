@@ -1,6 +1,8 @@
 # Package Architecture
 
-React Native Blueprint is being extracted from the original Expo prototype into a set of focused packages. The prototype application remains at the repository root until RNBP-006 moves it into `examples/expo-router`.
+React Native Blueprint is organised into focused packages. The Expo Router
+consumer under `examples/expo-router` hosts the Open Social workbench; the
+original prototype application has been removed.
 
 ## Packages
 
@@ -57,4 +59,13 @@ Package TypeScript settings inherit from `tsconfig.base.json`. Each package comp
 
 ## Prototype boundary
 
-The Expo application currently under `app/`, `components/`, `design-system/` and related root folders is a migration host only. Publishable package code lives exclusively under `packages/`. RNBP-006 will move the prototype into `examples/expo-router`.
+The Expo application lives under `examples/expo-router` and consumes Blueprint through public package exports. Publishable package code lives exclusively under `packages/`. The former root-level application folders and Expo starter reset script have been removed after the RNBP-006 migration.
+
+### Optional inspection tooling entries
+
+`@react-native-blueprint/react-native/babel` is a CommonJS development compiler
+plugin. `@react-native-blueprint/react-native/devtools` is a pre-React transport
+adapter accepting the official backend from the integrating app. Both are
+explicit, typed, packaged exports. Neither requires another Blueprint package
+beyond core; the runtime has no mandatory DevTools dependency. See INSPECTION.md
+for source annotations, external mappings, public-ref picking and the companion.

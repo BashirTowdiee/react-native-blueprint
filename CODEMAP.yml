@@ -1,0 +1,193 @@
+# Human-maintained repository map. Paths are relative to the repository root.
+# Update this file when package boundaries, entry points or commands change.
+version: 1
+project:
+  name: React Native Blueprint
+  purpose: Development-only screen previews, canvas and inspection for React Native apps.
+  tooling:
+    language: TypeScript
+    package_manager: yarn@4.18.1
+    linker: node-modules
+    ci_node_version: 22
+  configuration:
+    - package.json
+    - yarn.lock
+    - .yarnrc.yml
+    - tsconfig.base.json
+    - .github/workflows/ci.yml
+
+packages:
+  core:
+    path: packages/core
+    package: '@react-native-blueprint/core'
+    responsibility: Navigation-independent screen contracts, registry, preview and plugin contracts.
+    entry_points:
+      - packages/core/src/index.ts
+    key_files:
+      - packages/core/src/types.ts
+      - packages/core/src/registry.ts
+      - packages/core/src/preview.ts
+      - packages/core/src/plugins.ts
+      - packages/core/src/navigationFlow.ts
+    internal_dependencies: []
+    tests: packages/core/__tests__
+  react_native:
+    path: packages/react-native
+    package: '@react-native-blueprint/react-native'
+    responsibility: Canvas, artboards, preview providers, inspection and workbench controls.
+    entry_points:
+      - packages/react-native/src/index.ts
+      - packages/react-native/src/dev.tsx
+    key_files:
+      - packages/react-native/src/BlueprintView.tsx
+      - packages/react-native/src/BlueprintWorkspace.tsx
+      - packages/react-native/src/BlueprintNavigationFlow.tsx
+      - packages/react-native/src/flowLayout.ts
+      - packages/react-native/src/FlowConnections.tsx
+      - packages/react-native/src/flowRouting.ts
+      - packages/react-native/src/screenSnapshot.ts
+      - packages/react-native/src/canvasGestures.ts
+      - packages/react-native/src/PreviewHost.tsx
+      - packages/react-native/src/zoom.ts
+      - packages/react-native/src/inspection.tsx
+      - packages/react-native/src/inspectionSources.ts
+      - packages/react-native/babel.cjs
+      - packages/react-native/babel.d.cts
+      - packages/react-native/devtools.cjs
+      - packages/react-native/devtools.d.cts
+      - packages/react-native/src/Workbench.tsx
+      - packages/react-native/src/InspectionHistory.tsx
+      - packages/react-native/src/dataTools.ts
+      - packages/react-native/dev.js
+      - packages/react-native/dev.d.ts
+    internal_dependencies: [core]
+    tests: packages/react-native/__tests__
+  expo_router:
+    path: packages/expo-router
+    package: '@react-native-blueprint/expo-router'
+    responsibility: Expo Router discovery, route metadata, fixtures and variants.
+    entry_points:
+      - packages/expo-router/src/index.ts
+    internal_dependencies: [core]
+    tests: packages/expo-router/__tests__
+  react_navigation:
+    path: packages/react-navigation
+    package: '@react-native-blueprint/react-navigation'
+    responsibility: Static navigation manifests, dynamic registration and preview navigation context.
+    entry_points:
+      - packages/react-navigation/src/index.ts
+    internal_dependencies: [core]
+    tests: packages/react-navigation/__tests__
+  plugin_redux:
+    path: packages/plugin-redux
+    package: '@react-native-blueprint/plugin-redux'
+    responsibility: Optional Redux state inspection through an app-provided store.
+    entry_points:
+      - packages/plugin-redux/src/index.ts
+    internal_dependencies: [core]
+    tests: packages/plugin-redux/__tests__
+  plugin_tokens:
+    path: packages/plugin-tokens
+    package: '@react-native-blueprint/plugin-tokens'
+    responsibility: Optional design-token inspection and updates through an app-provided source.
+    entry_points:
+      - packages/plugin-tokens/src/index.ts
+    internal_dependencies: [core]
+    tests: packages/plugin-tokens/__tests__
+
+examples:
+  expo_router:
+    path: examples/expo-router
+    responsibility: Expo host for all-screen previews and an app-owned Open Social navigation stack.
+    entry_points:
+      - examples/expo-router/app/_layout.tsx
+      - examples/expo-router/app/index.tsx
+      - examples/expo-router/app/(ide)/ide.tsx
+    key_files:
+      - examples/expo-router/showcase/SocialApp.tsx
+      - examples/expo-router/showcase/SocialNavigationApp.tsx
+      - examples/expo-router/showcase/SocialFlow.tsx
+      - examples/expo-router/showcase/inspectionConfig.ts
+      - examples/expo-router/showcase/devtoolsConnection.cjs
+      - examples/expo-router/entry.js
+      - examples/expo-router/babel.config.cjs
+      - examples/expo-router/babel-blueprint-source.cjs
+    route: /ide
+  react_navigation:
+    path: examples/react-navigation
+    responsibility: Consumer fixture for static and dynamic React Navigation integration.
+    entry_points:
+      - examples/react-navigation/src/App.tsx
+    guide: examples/react-navigation/README.md
+  bluesky:
+    path: examples/bluesky
+    responsibility: Development harness source for a separate pinned upstream production app checkout.
+    entry_points:
+      - examples/bluesky/BlueprintWorkbench.tsx
+    guide: examples/bluesky/README.md
+    setup: scripts/setup-bluesky-showcase.mjs
+    checkout: examples/upstream/bluesky
+    notes:
+      - The checkout is ignored and excluded from workspace discovery and Jest.
+      - Read the ticket and evidence for current upstream runtime acceptance.
+
+validation:
+  install: yarn install --immutable
+  build: yarn build:packages
+  typecheck: yarn typecheck
+  tests: yarn test:ci
+  boundaries:
+    command: yarn check:boundaries
+    script: scripts/validate-package-boundaries.mjs
+  example_smoke:
+    command: yarn smoke:examples
+    script: scripts/validate-example-smoke.mjs
+  package_contents:
+    command: yarn validate:packages
+    script: scripts/validate-package-contents.mjs
+  release: yarn validate:release
+  run_expo: yarn example:expo
+  run_expo_web: yarn example:expo:web
+  run_devtools: yarn example:devtools
+  devtools_server: scripts/blueprint-devtools.mjs
+  clone_showcase: yarn showcase:clone
+  prepare_showcase: yarn showcase:prepare
+
+documentation:
+  overview: README.md
+  architecture: docs/PACKAGE_ARCHITECTURE.md
+  integration: docs/QUICK_START.md
+  development_guards: docs/DEVELOPMENT_INTEGRATION.md
+  preview_providers: docs/PREVIEW_PROVIDERS.md
+  navigation: docs/REACT_NAVIGATION.md
+  plugins: docs/PLUGINS.md
+  canvas: docs/CANVAS.md
+  inspection: docs/INSPECTION.md
+  workshop: docs/IDE_WORKSHOP.md
+  compatibility: docs/COMPATIBILITY.md
+  release: docs/RELEASE_CHECKLIST.md
+  refactor_history: docs/REFACTOR_PLAN.md
+  backlog: docs/tasks/README.md
+  workbench_ticket: docs/tasks/RNBP-016.md
+  lifecycle_ticket: docs/tasks/RNBP-017.md
+  flow_ticket: docs/tasks/RNBP-018.md
+  inspection_selection_ticket: docs/tasks/RNBP-019.md
+  optional_inspection_ticket: docs/tasks/RNBP-020.md
+  optional_inspection_evidence: docs/evidence/OPTIONAL_INSPECTION.md
+  component_source_evidence: docs/evidence/COMPONENT_SOURCE.md
+  flow_evidence: docs/evidence/NAVIGATION_FLOW.md
+  workbench_evidence: docs/evidence/IDE_UPLIFT.md
+
+generated:
+  patterns:
+    - node_modules/
+    - .yarn/install-state.gz
+    - '**/dist/'
+    - '**/.expo/'
+    - '**/expo-env.d.ts'
+    - '**/*.tsbuildinfo'
+    - output/playwright/
+  upstream_checkout: examples/upstream/
+  notes:
+    - Package dist files are build outputs used by public exports; rebuild from source.
+    - The upstream checkout can contain harness or user edits; inspect before cleanup.

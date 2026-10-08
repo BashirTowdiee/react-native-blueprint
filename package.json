@@ -20,32 +20,29 @@
     "check:boundaries": "node scripts/validate-package-boundaries.mjs",
     "validate:packages": "node scripts/validate-package-contents.mjs",
     "smoke:examples": "node scripts/validate-example-smoke.mjs",
-    "validate:release": "yarn check:boundaries && yarn typecheck && yarn test:ci && yarn smoke:examples && yarn validate:packages"
+    "validate:release": "yarn check:boundaries && yarn typecheck && yarn test:ci && yarn smoke:examples && yarn validate:packages",
+    "showcase:clone": "node scripts/setup-bluesky-showcase.mjs",
+    "showcase:prepare": "yarn build:packages && node scripts/setup-bluesky-showcase.mjs --prepare",
+    "example:devtools": "node scripts/blueprint-devtools.mjs"
   },
   "jest": {
     "preset": "jest-expo",
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/examples/expo-router/$1"
-    }
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/examples/upstream/"
+    ]
   },
   "dependencies": {
-    "@expo/vector-icons": "^14.0.2",
-    "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
-    "@reduxjs/toolkit": "^2.6.0",
     "expo": "~52.0.37",
-    "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.7",
     "expo-font": "~13.0.4",
-    "expo-haptics": "~14.0.1",
     "expo-linking": "~7.0.5",
     "expo-router": "~4.0.17",
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.1",
-    "expo-symbols": "~0.2.2",
     "expo-system-ui": "~4.0.8",
-    "expo-web-browser": "~14.0.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.7",
@@ -56,8 +53,7 @@
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
     "react-redux": "^9.2.0",
-    "redux": "^5.0.1",
-    "redux-persist": "^6.0.0"
+    "redux": "^5.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

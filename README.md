@@ -57,3 +57,29 @@ test, example smoke and package-content validation sequence.
 The RNBP-001 through RNBP-015 refactor is complete. Blueprint View no longer
 requires application screens to know about Blueprint and core remains
 independent of Expo Router, React Navigation and Redux.
+
+## Inspection workbench and showcase
+
+The `/ide` route opens **Open Social**, an interactive offline showcase with
+72 fixture posts. **Navigation** runs one app-owned navigation stack; **Navigation
+flow** builds a horizontal route hierarchy from navigation actions, with mapped
+or discovered placeholders; **All screens** mounts all 10 previews together.
+Navigation is the default.
+Switching modes starts a fresh session. The development root route opens the
+workbench directly; the original Japanese-study demo has been removed.
+See [Workspace modes](docs/CANVAS.md#workspace-modes) for the public integration API.
+
+The workbench adds screen/component/data search, wrapper-free source inspection, external config mappings and an optional official
+React DevTools companion, optional custom copyable data, saved data comparisons, a data-change
+history, device/rotation controls, React render metrics, focus and refresh. See
+[Inspection guide](docs/INSPECTION.md) and [workshop decisions](docs/IDE_WORKSHOP.md).
+
+A pinned checkout of the production **Bluesky** app can be recreated with
+`yarn showcase:clone`. `yarn showcase:prepare` adds a development harness for its
+actual screens. Dependency installation and launch are separate; see
+[Bluesky showcase](examples/bluesky/README.md).
+
+The Details **Settings** tab identifies the inspection sources in use. The example
+keeps only SettingsPanel wrapped; other elements use development compiler metadata
+and external mappings. Run `yarn example:devtools` and choose **Open React tree**
+for the actual React component tree, props and hooks in the official companion.
