@@ -20,10 +20,14 @@
     "check:boundaries": "node scripts/validate-package-boundaries.mjs",
     "validate:packages": "node scripts/validate-package-contents.mjs",
     "smoke:examples": "node scripts/validate-example-smoke.mjs",
-    "validate:release": "yarn check:boundaries && yarn typecheck && yarn test:ci && yarn smoke:examples && yarn validate:packages",
+    "validate:release": "yarn release:version:check && yarn test:release && yarn check:boundaries && yarn typecheck && yarn test:ci && yarn smoke:examples && yarn validate:packages",
     "showcase:clone": "node scripts/setup-bluesky-showcase.mjs",
     "showcase:prepare": "yarn build:packages && node scripts/setup-bluesky-showcase.mjs --prepare",
-    "example:devtools": "node scripts/blueprint-devtools.mjs"
+    "example:devtools": "node scripts/blueprint-devtools.mjs",
+    "release:version": "node scripts/blueprint-release.mjs version",
+    "release:version:check": "node scripts/blueprint-release.mjs check",
+    "release:pack": "yarn build:packages && node scripts/blueprint-release.mjs pack",
+    "test:release": "node --test scripts/blueprint-release.test.mjs"
   },
   "jest": {
     "preset": "jest-expo",

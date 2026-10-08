@@ -1,3 +1,5 @@
+export { BLUEPRINT_VERSION } from './version';
+
 export {
   createBlueprintFlowState,
   navigateBlueprintFlow,

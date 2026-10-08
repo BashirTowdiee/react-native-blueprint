@@ -27,6 +27,8 @@ export type BlueprintDevToolsConnection = {
   open(): void;
 };
 export type BlueprintInspectionConfiguration = {
+  /** Provenance supplied by the application's pinned release manifest. */
+  release?: { sourceCommit: string; channel?: string };
   automatic?: boolean;
   mappings?: readonly BlueprintInspectionMapping[];
   devTools?: BlueprintDevToolsConnection;

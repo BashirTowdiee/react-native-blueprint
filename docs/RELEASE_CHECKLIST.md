@@ -12,8 +12,18 @@
 
 ## Versioning
 
-All Blueprint packages currently move together. Apply the same release version
-to:
+All Blueprint packages move together. Set and verify their version with:
+
+```sh
+yarn release:version 0.2.0-dev.1
+yarn install
+yarn release:version:check
+yarn validate:release
+```
+
+The version command updates the public `BLUEPRINT_VERSION` constant and all six
+package manifests. Internal dependencies retain `workspace:*`; Yarn rewrites them
+to the coordinated version when packing. The packages are:
 
 1. `@react-native-blueprint/core`
 2. `@react-native-blueprint/react-native`
@@ -22,8 +32,16 @@ to:
 5. `@react-native-blueprint/plugin-redux`
 6. `@react-native-blueprint/plugin-tokens`
 
-Update internal workspace dependency ranges as part of the same versioning
-change and regenerate `yarn.lock`.
+Commit the versioned, validated source before packing. Create immutable archives
+and their source commit/checksum manifest with `yarn release:pack`. Output defaults
+to ignored `releases/<version>/`; an explicit output directory may be supplied.
+The packer requires a clean Git tree and refuses to overwrite archives. Consumers
+should keep the tarballs at stable, versioned paths and pin the matching core
+dependency via their package manager's override when using local archives.
+
+Local packaging does not publish packages or create remote Git tags. The Settings
+view shows `BLUEPRINT_VERSION`; consumers can supply `inspection.release` from
+the release manifest to display its source commit and channel.
 
 ## Package verification
 
@@ -32,7 +50,9 @@ It rejects private packages, unexpected tarball files and exports whose built
 targets are missing.
 
 Review the resulting package sizes before a public release. Package tarballs are
-expected to contain only `package.json` and `dist/**`.
+expected to contain `package.json`, `dist/**` and the renderer's explicitly
+allow-listed public Babel/DevTools/development forwarding files. Examples and
+upstream checkout files are excluded and release packing checks that boundary.
 
 ## Publication order
 

@@ -45,3 +45,4 @@ yarn-error.*
 # Pinned production app reference (recreated by showcase setup script)
 examples/upstream/
 output/playwright/
+releases/

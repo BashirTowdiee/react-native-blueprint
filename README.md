@@ -40,6 +40,13 @@ version floors and the currently validated baseline are in
 
 ## Validation
 
+Blueprint packages use coordinated semantic versions. `yarn release:version
+<version>` updates all six packages and the public version constant; run `yarn
+install` afterward. `yarn release:pack` creates library-only archives and a manifest
+with their SHA-256 hashes and exact clean source commit. See the release checklist
+for local pinned consumers and publication. Blueprint Settings shows the installed
+version and, when supplied by the app, its release provenance.
+
 ```bash
 yarn check:boundaries
 yarn typecheck

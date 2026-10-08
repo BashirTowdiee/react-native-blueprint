@@ -3,6 +3,21 @@ import { ScrollView, Text } from 'react-native';
 import renderer, { act, type ReactTestRenderer } from 'react-test-renderer';
 
 import { BlueprintView, createBlueprintViewportFromPreset } from '../src';
+import { BLUEPRINT_VERSION } from '@react-native-blueprint/core';
+
+it('identifies the installed Blueprint version and app-supplied release provenance', async () => {
+  let view!: ReactTestRenderer;
+  await act(async () => { view = renderer.create(<BlueprintView
+    artboards={[{ id: 'release', label: 'Release', content: <Text>App</Text> }]}
+    defaultSelectedArtboardId="release"
+    inspection={{ release: { sourceCommit: '71932bdf123456789', channel: 'development' } }}
+  />); });
+  await act(async () => view.root.findAllByProps({ accessibilityLabel: 'Settings' })[0].props.onPress());
+  const card = view.root.findByProps({ testID: 'blueprint-release-info' });
+  expect(JSON.stringify(card.findAllByType(Text).map(node => node.props.children))).toContain(BLUEPRINT_VERSION);
+  expect(JSON.stringify(card.findAllByType(Text).map(node => node.props.children))).toContain('71932bdf1234');
+  await act(async () => view.unmount());
+});
 
 describe('BlueprintView', () => {
   it('renders data-driven artboards and keeps zoom controls bounded', async () => {

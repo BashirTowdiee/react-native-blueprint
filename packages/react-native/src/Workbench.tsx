@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { InspectionHistory, SnapshotComparison } from './InspectionHistory';
 import { compareBlueprintSnapshots } from './dataTools';
+import { BLUEPRINT_VERSION } from '@react-native-blueprint/core';
 import type { BlueprintViewport } from '@react-native-blueprint/core';
 import type {
   BlueprintDevicePreset,
@@ -482,6 +483,13 @@ export function BlueprintDetails({
               </>
             ) : null}
             {tab === 'Settings' ? <View style={{ gap: 12 }} testID="blueprint-inspection-settings">
+              <View style={s.sourceCard} testID="blueprint-release-info">
+                <Text style={s.sourceFile}>Blueprint</Text>
+                <Text style={s.title}>{BLUEPRINT_VERSION}</Text>
+                {configuration?.release ? <Text selectable style={s.small}>
+                  {configuration.release.channel ?? 'Pinned build'} · {configuration.release.sourceCommit.slice(0, 12)}
+                </Text> : null}
+              </View>
               <Text style={s.sectionTitle}>Inspection sources</Text>
               <Text style={s.muted}>Source, naming and live data providers.</Text>
               <WorkbenchButton label={showSourceHelp ? 'Hide source descriptions' : 'About inspection sources'} variant="text" onPress={() => setShowSourceHelp(!showSourceHelp)} />

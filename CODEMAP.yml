@@ -28,6 +28,7 @@ packages:
       - packages/core/src/registry.ts
       - packages/core/src/preview.ts
       - packages/core/src/plugins.ts
+      - packages/core/src/version.ts
       - packages/core/src/navigationFlow.ts
     internal_dependencies: []
     tests: packages/core/__tests__
@@ -146,6 +147,11 @@ validation:
     command: yarn validate:packages
     script: scripts/validate-package-contents.mjs
   release: yarn validate:release
+  version: yarn release:version
+  version_check: yarn release:version:check
+  pack_release: yarn release:pack
+  release_script: scripts/blueprint-release.mjs
+  release_tests: scripts/blueprint-release.test.mjs
   run_expo: yarn example:expo
   run_expo_web: yarn example:expo:web
   run_devtools: yarn example:devtools
@@ -187,6 +193,7 @@ generated:
     - '**/expo-env.d.ts'
     - '**/*.tsbuildinfo'
     - output/playwright/
+    - releases/
   upstream_checkout: examples/upstream/
   notes:
     - Package dist files are build outputs used by public exports; rebuild from source.
